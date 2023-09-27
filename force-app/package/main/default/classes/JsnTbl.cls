@@ -2,10 +2,9 @@
  * @description A class representing a data table that can be used in LWC
  */
 
- // sharing issues when object data table
  
 // update the attribute names to simply be numbers lose the atttri (so this matches data cloud)
-// Set column names / with index
+// Set column names / with index to allow for a custom index when creating a flat data file
 
 global with sharing class JsnTbl {
    
@@ -371,16 +370,19 @@ global with sharing class JsnTbl {
                 }else{
                     for(Object o : (Object[]) input.get(key)){
                         
-                        // Allow for the first child record to have the attriute removed
+                        // Allow for the first child record to have the attribute removed
+                        // This is required if the first object contains a child object i.e. "records"
+                        // to not have the attribute name
                         keyPath = (
-                            (!keyPath.contains('.') && this.hideChildListAttributeFromPath) ?
-                                '' : (
+                            (String.isBlank(path) && this.hideChildListAttributeFromPath) ?
+                                path : (
                                 (this.hideChildListAttributeFromPath) ? 
                                     keyPath.substringBeforeLast('.') : 
                                     keyPath
                             )
                         );
 
+                        // Add an object map to the data
                         this.keyValueData.add(
                             this.traverseObjectMap(
                                 keyPath,
