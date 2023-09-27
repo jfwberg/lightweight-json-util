@@ -4,7 +4,11 @@
 
  
 // update the attribute names to simply be numbers lose the atttri (so this matches data cloud)
+
 // Set column names / with index to allow for a custom index when creating a flat data file
+// custom setter for handy dandy
+// Nested value lists are handled funky, but that works best for data cloud responses
+// update headers?
 
 global with sharing class JsnTbl {
    
@@ -314,7 +318,7 @@ global with sharing class JsnTbl {
             // Populate the data in the correct columns
             for(Integer row=0, numRows = this.keyValueData.size(); row < numRows; row++){
                 for(String key : this.keyValueData[row].keySet()){
-                    this.csvData[row+offset][this.columnIndexMap.get(key)] = String.valueOf(this.keyValueData[row].get(key)).escapeCsv();
+                    this.csvData[row+offset][this.columnIndexMap.get(key)] = String.valueOf(this.keyValueData[row].get(key))?.escapeCsv();
                 }
             }
         }
@@ -382,14 +386,17 @@ global with sharing class JsnTbl {
                             )
                         );
 
-                        // Add an object map to the data
-                        this.keyValueData.add(
-                            this.traverseObjectMap(
-                                keyPath,
-                                (Map<String,Object>) o,
-                                new Map<String,Object>()
-                            )
-                        );
+                        // Extra check or we cannot deal with value types yet
+                        if(o instanceOf Map<String,Object>){
+                            // Add an object map to the data
+                            this.keyValueData.add(
+                                this.traverseObjectMap(
+                                    keyPath,
+                                    (Map<String,Object>) o,
+                                    new Map<String,Object>()
+                                )
+                            );
+                        }
                     }
                 }
 
@@ -417,13 +424,17 @@ global with sharing class JsnTbl {
      */
     private Object[] traverseObjectList(String path, Object[] input, List<Map<String,Object>> output){
         
+        Map<String,Object> unknownAttributes =  new Map<String,Object>();
+
         // If there are values that are not objects and do not have a key/value pair structure
         // the will be put into a "unknown attributes" map that can be transformed into table columns
-        Map<String,Object> unknownAttributes = new Map<String,Object>();
+        Integer attributeCounter = 0;
 
         // Iterate each object in the list that will transform into a data row
         for (Integer i = 0, max=input.size(); i < max; i++) {
+            
             if(input[i] instanceof Map<String,Object>){
+                
                 output.add(
                     this.traverseObjectMap(
                         path,
@@ -431,31 +442,83 @@ global with sharing class JsnTbl {
                         new Map<String,Object>()
                     )
                 );
+
             }else if(input[i] instanceof Object[]){
                 
                 // If lists are ignored, skip to the next record
                 if(!this.includeChildLists){continue;}
 
-                // Add the list as an attribute
-                unknownAttributes.put(
-                    'attr' + unknownAttributes.size(),
-                    this.traverseObjectList(
-                        path,
-                        (Object[]) input[i],
-                        new List<Map<String,Object>>()
-                    )
-                );
+                
+                String pathKey = ( String.isNotBlank(path) ? path + '.' : '') +  String.valueOf(attributeCounter);
+
+                this.columnNames.add(pathKey);
+                attributeCounter++;
+
+                // create a new map
+                // each value from this list is added
+                
+                //output.add(this.handleList((Object[])input[i]));
+
+                for( Object woot : this.traverseObjectList(
+                    pathKey,
+                    (Object[]) input[i],
+                    new List<Map<String,Object>>()
+                )){
+                    output.add((Map<String,Object>)woot);
+                }
+                
+                
             }else{
+
+                String pathKey = String.valueOf(attributeCounter);
+
+                this.columnNames.add(pathKey);
+
+                attributeCounter++;
+
                 // If there is a list with unknown attributes it will be added here i.e. [1,2,3]
                 // will become [{"attr0" : 1}, {"attr0" : 2}, {"attr2" : 3}]
                 // So this translates into 3 columns with values and unknow attribute name
-                unknownAttributes.put('attr' + unknownAttributes.size(), input[i]);
+                unknownAttributes.put(
+                     pathKey,input[i]
+                );
+                
             }
         }
 
         // Collect all attributes and add them to the output
         if(!unknownAttributes.isEmpty()){
-            output.add(unknownAttributes);
+           output.add(unknownAttributes);
+        }
+        return output;
+    }
+
+    /**
+     * @description Additional handling so that nested lists containing values can be handled
+     *              i.e. [[1,2,3],["a","b","c"]]
+     */
+    private Map<String,Object> handleList(Object[] input){
+        Integer counter = 0;
+        Map<String,Object> output = new Map<String,Object>();
+        for(Object o : input){
+            
+            if(o instanceOf Object[]){
+                
+                output.putAll(this.handleList((Object[]) o));
+                
+
+            }else if(o instanceOf Map<String,Object>){
+
+                output.putAll(this.traverseObjectMap(
+                    '',
+                    (Map<String,Object>) o,
+                    new Map<String,Object>()
+                ));
+
+            }else{
+                output.put(String.valueOf(counter),String.valueOf(o));
+            }
+            counter++;
         }
         return output;
     }
