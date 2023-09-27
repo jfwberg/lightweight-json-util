@@ -1,13 +1,15 @@
 /**
  * @description A class representing a data table that can be used in LWC
  */
+
+ // sharing issues when object data table
  
 // update the attribute names to simply be numbers lose the atttri (so this matches data cloud)
 // Set column names / with index
 
 global with sharing class JsnTbl {
    
-    // user upatable variables
+    // user updateable variables
     
 
     // Select this option to include child lists
@@ -42,14 +44,17 @@ global with sharing class JsnTbl {
 
     // The output containing the CSV data
     private List<String[]> csvData = new List<String[]>();
+
+    // private constants
+
+
+    // Message
+    private static final String UNSUPOPRTED_DATA_FORMAT_MESSAGE = 'When "addChildListsAsTables" is set to TRUE, you cannot create a JSON Table in an Indexed Data format "getIndexedData()" and a CSV Data format "getCsvData()". Only the Key Value Data format is supported "getKeyValueData()".';
     
 
     /** **************************************************************************************************** **
      **                                         GLOBAL SETTER METHODS                                          **
      ** **************************************************************************************************** **/
-    
-
-
     /**
      * @description Method that allows you to ignore any child lists
      *              Any properties that that is an instance of Object[] will be
@@ -160,6 +165,8 @@ global with sharing class JsnTbl {
         return this.columnIndexMap;
     }
 
+
+
     global List<Map<String,Object>> getKeyValueData(){
         return this.keyValueData;
     }
@@ -244,8 +251,18 @@ global with sharing class JsnTbl {
 
     /**
      * @description Method to Pre-populate all values in the indexedData array
+     * @param a
+     * @param a
+     * @param a
+     * @trows
      */
     private void createIndex(List<Object[]> input, Integer additionalRows, Boolean stringList){
+
+        // Check  to prevent any lovely errors with regards to nested table objects
+        if(this.includeChildLists && this.addChildListsAsTables){
+            throw new Jsn.JsonUtilException(JsnTbl.UNSUPOPRTED_DATA_FORMAT_MESSAGE);
+        }
+
         // Create the rows
         for(Integer row=0, numRows = this.keyValueData.size() + additionalRows; row < numRows; row++){
 
