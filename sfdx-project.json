@@ -1,0 +1,26 @@
+{
+  "packageDirectories": [
+    {
+      "path": "force-app/package",
+      "default": true,
+      "package": "Lightweight - Lightweight - JSON Util",
+      "versionName": "Version 1.0",
+      "versionNumber": "1.0.0.NEXT",
+      "versionDescription": "A lightweight Apex utility for parsing and traversing untyped JSON Object Maps"
+    },
+    {
+      "path": "force-app/package",
+      "default": false,
+      "package": "Lightweight - Lightweight - JSON Util (Unlocked)",
+      "versionName": "Version 1.0",
+      "versionNumber": "1.0.0.NEXT",
+      "versionDescription": "A lightweight Apex utility for parsing and traversing untyped JSON Object Maps"
+    }
+  ],
+  "name": "lightweight-json-util",
+  "namespace": "utl",
+  "sfdcLoginUrl": "https://login.salesforce.com",
+  "sourceApiVersion": "58.0",
+  "packageAliases": {
+  }
+}

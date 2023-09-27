@@ -1,0 +1,135 @@
+/**
+ * DATA    : 1000 Accounts with 10 Contacts each
+ * TEST 01 : Fetching the result.records[].Contacts.records[].Owner.Profile.Name
+ *           for 10k records and add them to an Object Maps
+ * VARIANT : Optimised inline type casting without any temporary variables
+ * RESULT  : AVG CPU Time : 926
+ *           Heap Size    : 695,105
+ */
+// Query configuration
+String  query      = 'SELECT Name, (SELECT FirstName, LastName, Owner.Profile.Name FROM contacts LIMIT 10) FROM Account WHERE Name LIKE \'Demo Account - %\' ORDER BY Name ASC LIMIT 1000';
+String  jsonString = getQueryResponseBody(query, false);
+
+try{
+    // Hold the CPU Time values for each test
+    Integer[] CpuTimes = new Integer[]{};
+
+    // Run the test X amount of times
+    for (Integer i = 0; i < 10; i++) {
+        
+        // Data test set
+        Set<Object> recordOwnerNames =  new Set<Object>{};
+        
+        // Reset the result map;
+        Map<String,Object> result = null;
+
+        // Register the starting limits
+        Integer startCpuTime = Limits.getCpuTime();
+        Integer startHeapSize= Limits.getHeapSize();
+
+        // Deserialize into top result object map
+        result = (Map<String,Object>) JSON.deserializeUntyped(jsonString);
+
+        // Get the list of account records from the result
+        Object[] accountRecords = (Object[]) result.get('records');
+
+        // Iterate the account records
+        for(Object accountRecord : accountRecords){
+
+            // Type case the the object to an object map
+            Map<String,Object> accountRecordMap = (Map<String,Object>) accountRecord;
+
+            // Typecast the records[].contacts to an object map
+            Map<String,Object> contactsRecordMap = (Map<String,Object>) accountRecordMap.get('Contacts');
+
+            // Get the list of contact records from the result: records[].contacts.records
+            Object[] contactRecords = (Object[]) contactsRecordMap.get('records');
+
+            // Iterate the contact records
+            for(Object contactRecord : contactRecords){
+                
+                // Type case the the object to an object map
+                Map<String,Object> contactRecordMap = (Map<String,Object>) contactRecord;
+                
+                // Typecast the owner to an object map (records[].Contacts.records[].Owner)
+                Map<String,Object> ownerRecordMap = (Map<String,Object>) contactRecordMap.get('Owner');
+
+                // Typecast the profile to an object map (records[].Contacts.records[].Owner.Profile)
+                Map<String,Object> profileRecordMap = (Map<String,Object>) ownerRecordMap.get('Profile');
+                
+                // Finally add the profile name to the list
+                recordOwnerNames.add(profileRecordMap.get('Name'));
+            }
+        }
+
+        Integer endCpuTime  = Limits.getCpuTime();
+        Integer endHeapSize = Limits.getHeapSize();
+
+        // Output the limits info for performance measuring
+        System.debug('CPU Time : ' + (endCpuTime - startCpuTime));
+        System.debug('Heap size: ' + (endHeapSize - startHeapSize));
+
+        // Add the test data to the list
+        CpuTimes.add(endCpuTime - startCpuTime);
+    }
+
+    Integer total=0;
+    for (Integer i = 0, max = CpuTimes.size(); i < max; i++) {
+        total+=CpuTimes[i];
+    }
+    System.debug((Decimal)total/CpuTimes.size());
+
+
+}catch(System.JSONException e){
+    System.debug('Invalid JSON detected: ' + e.getMessage());
+}
+
+
+
+
+
+
+
+
+    /**
+     * Method for calling a Salesforce Rest API
+     */
+    private static String getQueryResponseBody(String query, Boolean isTooling){
+        
+        Http http = new Http();
+        HttpRequest httpRequest = new HttpRequest();
+        httpRequest.setEndpoint(URL.getSalesforceBaseUrl().toExternalForm() + '/services/data/v58.0/'+ (IsTooling ? 'tooling/' : '' ) +'query?q=' + EncodingUtil.urlEncode(query, 'UTF-8'));
+        httpRequest.setMethod('GET');
+        httpRequest.setHeader('Content-Type', 'application/json;charset=UTF-8');
+        httpRequest.setHeader('Authorization', 'Bearer ' + userInfo.getSessionId());
+        HttpResponse response =  http.send(httpRequest);
+        
+        switch on response.getStatusCode() {
+            // Success responses
+            when 200 {
+                return response.getBody();
+            }
+            when 400, 401, 404, 405 {
+                handleSalesforceErrorResponse(response.getBody());
+            }
+            when else{
+                handleUnknownResponse(response.getBody());
+            }
+        }
+        return null;
+    }
+
+
+    /**
+     * Method to throw an exception containing the Salesforce API Error Message 
+     */
+    private static void handleSalesforceErrorResponse(String responseBody){
+        for( Object record : (Object[]) JSON.deserializeUntyped(responseBody)){
+            throw new StringException((String)((Map<String, Object>) record).get('message'));
+        }
+    }
+
+
+    private static void handleUnknownResponse(String responseBody){
+        throw new StringException('Unknown error response: ' + responseBody);
+    }
