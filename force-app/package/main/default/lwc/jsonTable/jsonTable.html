@@ -1,0 +1,46 @@
+<template>
+    <lightning-card icon-name="standard:account" variant="base">
+      <div slot="title">
+          Create a Table from a JSON String
+      </div>
+      <div slot="actions">
+        <lightning-button 
+            variant="brand"
+            label="Create Table" 
+            onclick={handleClickCreate} 
+            ></lightning-button>
+      </div>
+      <div class="slds-p-around_x-small">
+        <lightning-textarea 
+            name="jsonString" 
+            label="JSON String" 
+            value={jsonString}
+            variant="standard"
+            onchange={handleChangeJsonString}
+        ></lightning-textarea>
+        <lightning-input  
+            type="text"
+            label="Attribute filters"
+            value={attributeFilter}
+            onchange={handleChangeAttributeFilter}
+        ></lightning-input>
+        <lightning-input 
+            type="checkbox"
+            label="Hide child list attribute names"
+            name="hideChildListAttributeFromPath"
+            checked = {hideChildListAttributeFromPath}
+            onchange={handleChangeHideChildListAttributeFromPath}
+        ></lightning-input>
+        <lightning-input 
+            type="checkbox"
+            label="Hide child list attribute names"
+            name="hideChildListAttributeFromPath"
+            checked = {hideChildListAttributeFromPath}
+            onchange={handleChangeHideChildListAttributeFromPath}
+        ></lightning-input>
+    
+
+      </div>
+    </lightning-card>
+  
+</template>

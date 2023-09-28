@@ -2,13 +2,10 @@
  * @description A class representing a data table that can be used in LWC
  */
 
+ // add parse time in ms as an info
  
-// update the attribute names to simply be numbers lose the atttri (so this matches data cloud)
 
-// Set column names / with index to allow for a custom index when creating a flat data file
-// custom setter for handy dandy
-// Nested value lists are handled funky, but that works best for data cloud responses
-// update headers?
+
 
 global with sharing class JsnTbl {
    
@@ -50,7 +47,7 @@ global with sharing class JsnTbl {
 
     // private constants
 
-
+ 
     // Message
     private static final String UNSUPOPRTED_DATA_FORMAT_MESSAGE = 'When "addChildListsAsTables" is set to TRUE, you cannot create a JSON Table in an Indexed Data format "getIndexedData()" and a CSV Data format "getCsvData()". Only the Key Value Data format is supported "getKeyValueData()".';
     
