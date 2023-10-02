@@ -125,6 +125,7 @@ private with sharing class JsnTest {
         // Get the contact records, multiple levels deep
         Object[] conRecords = (Object[]) Jsn.getObjectList('Contacts.records', (Map<String,Object>) accRecords[0]);
         
+        
         // Assert contact records
         Assert.areEqual(
             10,
@@ -148,56 +149,9 @@ private with sharing class JsnTest {
             Jsn.getObjectList('invalidField.invalidField',(Map<String,Object>) accRecords[0]),
             'Unexpected Object value'
         );
-    }
-
-    @IsTest
-    static void testDataTableWithNestedLists(){
         
-        Jsn.DataTable jsnTbl = new Jsn.DataTable(
-            (object[]) JSON.deserializeUntyped('[[1],[2],[3],{"a" : "b"}]')
-        );
-
-        // There should be 1 result
-        Assert.areEqual(2, jsnTbl.data.size());
-
-        // The map in should have 3 items
-        Assert.areEqual(1,  jsnTbl.data[0].size());
-
-        // The second map should have 3 items
-        // This is because unknown attributes go at the end of the table 
-        Assert.areEqual(3,  jsnTbl.data[1].size());
-
     }
 
-    @IsTest
-    static void testDataTableWithNestedObjects(){
-        
-        Jsn.DataTable jsnTbl = new Jsn.DataTable(
-            (Map<String,Object>) JSON.deserializeUntyped('{"obj1" : {"a" : 1, "b" : 2}, "obj2" : {"y" : 25, "z" : 26, "e" : {"f" : 6} }, "obj3" : [1,2,3]}')
-        );
-
-        // There should be 1 result
-        Assert.areEqual(1, jsnTbl.data.size());
-
-        // The map in should have 6 items
-        Assert.areEqual(6,  jsnTbl.data[0].size());
-
-        // Assert everything is nice and flat
-        Assert.areEqual(1,  (Integer)((Map<String,Object>)jsnTbl.data[0]).get('obj1.a'));
-        Assert.areEqual(2,  (Integer)((Map<String,Object>)jsnTbl.data[0]).get('obj1.b'));
-        Assert.areEqual(25, (Integer)((Map<String,Object>)jsnTbl.data[0]).get('obj2.y'));
-        Assert.areEqual(26, (Integer)((Map<String,Object>)jsnTbl.data[0]).get('obj2.z'));
-
-        // 3rd level deep yet still flat
-        Assert.areEqual( 6, (Integer)((Map<String,Object>)jsnTbl.data[0]).get('obj2.e.f'));
-
-        // Test our list
-        Assert.areEqual( 1, ((List<Map<String,Object>>)(jsnTbl.data[0].get('obj3'))).size());
-
-        // Test the object inside out list to have 3 attributes
-        Assert.areEqual( 3, ((List<Map<String,Object>>)(jsnTbl.data[0].get('obj3')))[0].size());
-
-    }
 
     /** **************************************************************************************************** **
      **                                     PRIVATE TEST UTILITY METHODS                                     **

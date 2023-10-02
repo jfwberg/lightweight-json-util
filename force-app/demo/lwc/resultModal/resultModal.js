@@ -10,10 +10,12 @@ export default class ResultModal extends LightningModal {
 	// Columns for the data table
 	columns;
 
+    
     handleClose() {
         this.disconnectedCallback();
         this.close();
     }
+
 
     resizeTable = () => {
         try{
@@ -42,6 +44,7 @@ export default class ResultModal extends LightningModal {
             console.log(error.message);
         }
     }
+
 
     disconnectedCallback(){
         try{

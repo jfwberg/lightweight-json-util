@@ -2,7 +2,8 @@
  * @description A class representing a data table that can be used in LWC
  */
 
- // add parse time in ms as an info
+ 
+ // add CSV output button
  
 
 

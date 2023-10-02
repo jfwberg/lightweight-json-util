@@ -1,0 +1,60 @@
+<template>
+    <lightning-card icon-name="standard:customer_portal_users" variant="base">
+        
+        <lightning-spinner 
+          alternative-text="Loading" 
+          size="xx-small"
+          variant="base"
+          if:true={loading}
+        ></lightning-spinner>
+
+        <div slot="title">
+            Create a Data Table or CSV from a JSON String
+        </div>
+        <div slot="actions">
+            <lightning-button-group>
+                <lightning-button 
+                    variant="neutral"
+                    label="Create Table" 
+                    onclick={handleClickCreateTable} 
+                ></lightning-button>
+                <lightning-button 
+                        variant="neutral"
+                        label="Create CSV" 
+                        onclick={handleClickCreateCsv} 
+                ></lightning-button>
+            </lightning-button-group>
+        </div>
+        
+        <div class="slds-p-around_x-small">
+            <lightning-textarea 
+                name="jsonString" 
+                label="JSON String" 
+                value={jsonString}
+                variant="standard"
+                onchange={handleChangeJsonString}
+            ></lightning-textarea>
+            <lightning-input  
+                type="text"
+                label="Attribute filters"
+                value={attributeFilter}
+                onchange={handleChangeAttributeFilter}
+            ></lightning-input>
+            <lightning-input 
+                type="checkbox"
+                label="Include child lists"
+                name="includeChildLists"
+                checked = {includeChildLists}
+                onchange={handleChangeIncludeChildLists}
+            ></lightning-input>
+            <lightning-input 
+                type="checkbox"
+                label="Hide child list attribute names"
+                name="hideChildListAttributeFromPath"
+                checked = {hideChildListAttributeFromPath}
+                onchange={handleChangeHideChildListAttributeFromPath}
+            ></lightning-input>
+        </div>
+    </lightning-card>
+
+</template>

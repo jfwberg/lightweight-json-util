@@ -3,18 +3,18 @@
     {
       "path": "force-app/package",
       "default": true,
-      "package": "Lightweight - Lightweight - JSON Util",
+      "package": "Lightweight - JSON Util",
       "versionName": "Version 1.0",
       "versionNumber": "1.0.0.NEXT",
-      "versionDescription": "A lightweight Apex utility for parsing and traversing untyped JSON Object Maps"
+      "versionDescription": "A lightweight Apex utility for path based traversing of untyped Object Maps and converting JSON to a flat Data Table or CSV format"
     },
     {
       "path": "force-app/package",
       "default": false,
-      "package": "Lightweight - Lightweight - JSON Util (Unlocked)",
+      "package": "Lightweight - JSON Util (Unlocked)",
       "versionName": "Version 1.0",
       "versionNumber": "1.0.0.NEXT",
-      "versionDescription": "A lightweight Apex utility for parsing and traversing untyped JSON Object Maps"
+      "versionDescription": "A lightweight Apex utility for path based traversing of untyped Object Maps and converting JSON to a flat Data Table or CSV format"
     }
   ],
   "name": "lightweight-json-util",
