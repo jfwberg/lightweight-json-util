@@ -3,7 +3,7 @@
         
         <lightning-spinner 
           alternative-text="Loading" 
-          size="xx-small"
+          size="large"
           variant="base"
           if:true={loading}
         ></lightning-spinner>
@@ -27,34 +27,72 @@
         </div>
         
         <div class="slds-p-around_x-small">
-            <lightning-textarea 
-                name="jsonString" 
-                label="JSON String" 
-                value={jsonString}
-                variant="standard"
-                onchange={handleChangeJsonString}
-            ></lightning-textarea>
-            <lightning-input  
-                type="text"
-                label="Attribute filters"
-                value={attributeFilter}
-                onchange={handleChangeAttributeFilter}
-            ></lightning-input>
-            <lightning-input 
-                type="checkbox"
-                label="Include child lists"
-                name="includeChildLists"
-                checked = {includeChildLists}
-                onchange={handleChangeIncludeChildLists}
-            ></lightning-input>
-            <lightning-input 
-                type="checkbox"
-                label="Hide child list attribute names"
-                name="hideChildListAttributeFromPath"
-                checked = {hideChildListAttributeFromPath}
-                onchange={handleChangeHideChildListAttributeFromPath}
-            ></lightning-input>
+            <div class="slds-var-p-bottom_medium">
+                <div class="slds-form-element">
+                    <div class="slds-form-element__control">
+                        <textarea id="ta" placeholder="JSON String..." class="slds-textarea ta" onchange={handleChangeJsonString}>{jsonString}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slds-var-p-bottom_medium">
+                <lightning-input 
+                    type="checkbox"
+                    label="Include child lists"
+                    name="includeChildLists"
+                    checked = {includeChildLists}
+                    onchange={handleChangeIncludeChildLists}
+                ></lightning-input>
+            </div>
+
+            <div class="slds-var-p-bottom_medium">
+                <span class="slds-text-title">Child List Name Filter</span>
+                <span class="slds-var-p-around_small slds-size_large custom-helptext">
+                    <lightning-helptext 
+                        content="Select this to remove the name of a node from the path name. I.e. if you filter the value 'records', the path for 'Contacts.records.Id' becomes 'Contacts.Id'">
+                    </lightning-helptext>
+                 </span>
+                <lightning-input 
+                    variant = "label-hidden"
+                    type="text"
+                    label="Child List Name Filter"
+                    name="listNameFilter"
+                    value = {listNameFilter}
+                    onchange={handleChangeListNameFilter}
+                ></lightning-input>
+            </div>
+            
+            <div class="slds-var-p-bottom_medium">
+                <span class="slds-text-title">Attribute filters</span>
+                <span class="slds-var-p-around_small slds-size_large custom-helptext">
+                    <lightning-helptext 
+                        content="Attribute names in this field are removed from the result.">
+                    </lightning-helptext>
+                </span>
+                <lightning-input 
+                    variant = "label-hidden"
+                    type="text"
+                    label="Attribute filters"
+                    value={attributeFilter}
+                    onchange={handleChangeAttributeFilter}
+                ></lightning-input> 
+            </div>
+
+            <div class="slds-var-p-bottom_medium">
+                <span class="slds-text-title">Path</span>
+                <span class="slds-var-p-around_small slds-size_large custom-helptext">
+                    <lightning-helptext 
+                        content="Optionally set a start path in the JSON">
+                    </lightning-helptext>
+                </span>
+                <lightning-input 
+                    variant = "label-hidden"
+                    type="text"
+                    label="Start path"
+                    value={startPath}
+                    onchange={handleChangeStartPath}
+                ></lightning-input> 
+            </div>
         </div>
     </lightning-card>
-
 </template>

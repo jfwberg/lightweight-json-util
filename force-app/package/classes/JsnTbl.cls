@@ -2,34 +2,32 @@
  * @description A class representing a data table that can be used in LWC
  */
 
- 
- // add CSV output button
- 
 
-
+// set column names as well
+// use global list, not the passed in list
 
 global with sharing class JsnTbl {
    
     // user updateable variables
     
-
     // Select this option to include child lists
     private Boolean includeChildLists = true;
 
-    // Set to true if you want child lists to be added as a table object instead of
-    // new rows with the fields for those object
-    private Boolean addChildListsAsTables = false;
-
-    // Select this option to ignore the key of a child list for better readabillity
-    private Boolean hideChildListAttributeFromPath = true;
-    
     // Values to be ignored when creating the data table
-    private Set<String> attributeFilter;
+    private Set<String> attributeFilter = new Set<String>{};
+
+    // List names of this type will not be appended, this allows for a more flat table
+    private Set<String> listNameFilter  = new Set<String>{};
 
 
 
     // app variables
 
+    // Indicator if there are any attributes to check
+    private Boolean hasAttributeFilter = false;
+
+    // Indicator if there are any list name filters to check
+    private Boolean hasListNameFilter = false;
 
     // A list of all the column names, can be used when auto generating a data table or CSV output
     private Set<String> columnNames = new Set<String>{};
@@ -46,11 +44,6 @@ global with sharing class JsnTbl {
     // The output containing the CSV data
     private List<String[]> csvData = new List<String[]>();
 
-    // private constants
-
- 
-    // Message
-    private static final String UNSUPOPRTED_DATA_FORMAT_MESSAGE = 'When "addChildListsAsTables" is set to TRUE, you cannot create a JSON Table in an Indexed Data format "getIndexedData()" and a CSV Data format "getCsvData()". Only the Key Value Data format is supported "getKeyValueData()".';
     
 
     /** **************************************************************************************************** **
@@ -68,25 +61,6 @@ global with sharing class JsnTbl {
 
 
     /**
-     * @description Method to set the value for adding child lists as JsnTbl Objects
-     */
-    global JsnTbl setAddChildListsAsTables(Boolean addChildListsAsTables){
-        this.addChildListsAsTables = addChildListsAsTables;
-        return this;
-    }
-
-    /**
-     * @description Method to set the value for hideChildListAttributeFromPath, when set to true
-     *              the attribute name for child lists is not added to the path to allow for cleaner
-     *              path names that potentially make more sense for certain types of payloads
-     */
-    global JsnTbl setHideChildListAttributeFromPath(Boolean hideChildListAttributeFromPath){
-        this.hideChildListAttributeFromPath = hideChildListAttributeFromPath;
-        return this;
-    }
-
-
-    /**
      * @description Method to enable the property filter
      *              Any properties that are part of this list will be ignored when generating
      *              the data table, so unused attributes are filtered out
@@ -97,6 +71,18 @@ global with sharing class JsnTbl {
         return this;
     }
 
+
+    /**
+     * @description Method to enable the list name filter
+     *              Any list names like "records" will NOT be appended to to the column name
+     *              this allows for flatter tables, but might result in some funky results
+     *              i.e. new Set<String>{'attributes', 'totalSize' , 'done'} 
+     */
+    global JsnTbl setListNameFilter(Set<String> listNameFilter){
+        this.listNameFilter = listNameFilter;
+        return this;
+    }
+
     
     /** **************************************************************************************************** **
      **                                       GLOBAL SUPPORT METHODS                                         **
@@ -104,17 +90,17 @@ global with sharing class JsnTbl {
     /**
      * @description Create table from an untyped Object list
      */
-    global JsnTbl createFromObjectList(Object[] input){
+    global JsnTbl create(Object input){
         
         // Setup the table
         this.initiateTable();
+
+        // Set the attribute indicator so we do not have to check the set status on each iteration
+        this.hasAttributeFilter = (attributeFilter!= null) && !this.attributeFilter.isEmpty();
+        this.hasListNameFilter  = (listNameFilter != null) && !this.listNameFilter.isEmpty();
         
         // Execute logic
-        this.traverseObjectList(
-            '',
-            input,
-            this.keyValueData
-        );
+        this.traverseParent(input, null, this.keyValueData);
         
         // Create the revised column index
         this.createColumnIndexMap();
@@ -123,41 +109,10 @@ global with sharing class JsnTbl {
         return this;
     }
 
-
-    /**
-     * @description Create a table that starts with an untyped Object Map
-     *              This is not a very common scenario, non the less possible
-     */
-    global JsnTbl createFromObjectMap(Map<String,Object> input){
-        
-        // Setup the table
-        this.initiateTable();
-        
-        // Execute logic
-        this.keyValueData.add(
-            this.traverseObjectMap(
-                '',
-                input,
-                new Map<String,Object>()
-            )
-        );
-
-        // Create the revised column index
-        this.createColumnIndexMap();
-
-        // Return self for method chaining
-        return this;
-    }
-
-    
 
     /** **************************************************************************************************** **
      **                                       GLOBAL GETTER METHODS                                         **
      ** **************************************************************************************************** **/
-    
-
-
-
     global String[] getColumnNames(){
         return new List<String>(this.columnNames);
     }
@@ -259,11 +214,6 @@ global with sharing class JsnTbl {
      */
     private void createIndex(List<Object[]> input, Integer additionalRows, Boolean stringList){
 
-        // Check  to prevent any lovely errors with regards to nested table objects
-        if(this.includeChildLists && this.addChildListsAsTables){
-            throw new Jsn.JsonUtilException(JsnTbl.UNSUPOPRTED_DATA_FORMAT_MESSAGE);
-        }
-
         // Create the rows
         for(Integer row=0, numRows = this.keyValueData.size() + additionalRows; row < numRows; row++){
 
@@ -327,197 +277,138 @@ global with sharing class JsnTbl {
     /** **************************************************************************************************** **
      **                                       PRIVATE TRAVERSE METHODS                                       **
      ** **************************************************************************************************** **/
-
     /**
-     * @description Method to traverse an Object Map
-     * @param path
-     * @param input
-     * @param output
+     * @description Parent selector method, this method splits out how the top level record needs to be handled
+     *              based on the type. This makes sure the least amount of type casting has to be done.
      */
-    private Map<String,Object> traverseObjectMap(String path, Map<String,Object> input, Map<String,Object> output){
-        for(String key : input.keySet()){
-
-            // Concatenate the path levels with a period to flatten child objects
-            String keyPath = (String.isEmpty(path)) ? key : path + '.' + key;
-
-            // continue if a property needs to be ignored
-            if(this.attributeFilter != null && attributeFilter.contains(key)){continue;}
-         
-            // Handle when the child propery is an object
-            if(input.get(key) instanceof Map<String,Object>){
-                
-                this.traverseObjectMap(
-                        keyPath,
-                        (Map<String,Object>)input.get(key),
-                        output
-                    );
-
-            // Handle when the child propery is an object list
-            }else if(input.get(key) instanceof Object[]){
-
-                // If lists are ignored, skip to the next record
-                if(!this.includeChildLists){continue;}
-                
-                // Add a data table to the output
-                if(this.addChildListsAsTables){  
-                    output.put(
-                        (this.hideChildListAttributeFromPath) ? keyPath.substringBeforeLast('.') : keyPath,
-                        new JsnTbl()
-                            .setIncludeChildLists(this.includeChildLists)    
-                            .setAddChildListsAsTables(this.addChildListsAsTables)
-                            .setHideChildListAttributeFromPath(this.hideChildListAttributeFromPath)
-                            .setAttributeFilter(this.attributeFilter)
-                            .createFromObjectList((Object[])input.get(key))
-                    );
-                }else{
-                    for(Object o : (Object[]) input.get(key)){
-                        
-                        // Allow for the first child record to have the attribute removed
-                        // This is required if the first object contains a child object i.e. "records"
-                        // to not have the attribute name
-                        keyPath = (
-                            (String.isBlank(path) && this.hideChildListAttributeFromPath) ?
-                                path : (
-                                (this.hideChildListAttributeFromPath) ? 
-                                    keyPath.substringBeforeLast('.') : 
-                                    keyPath
-                            )
-                        );
-
-                        // Extra check or we cannot deal with value types yet
-                        if(o instanceOf Map<String,Object>){
-                            // Add an object map to the data
-                            this.keyValueData.add(
-                                this.traverseObjectMap(
-                                    keyPath,
-                                    (Map<String,Object>) o,
-                                    new Map<String,Object>()
-                                )
-                            );
-                        }
-                    }
-                }
-
-            // Handle the child propery as a value
-            }else{
-                // Add the columnn names for properties that contain values
-                this.columnNames.add(keyPath);
-                
-                // Add the value to the outputlist
-                output.put(
-                    keyPath,
-                    input.get(key)
-                );
-            }
+    private void traverseParent(Object input, String path, List<Map<String,Object>> dataRows){
+        if(input instanceof Map<String,Object>){
+            traverseParentMap((Map<String,Object>)input, path, dataRows);
+        }else if(input instanceof Object[]){
+            traverseParentList(        (Object[]) input, path, dataRows);
+        }else{
+            traverseParentObject(                 input, path, dataRows);
         }
-        return output;
     }
 
 
-    /**
-     * @description Method to traverse an Object List
-     * @param path
-     * @param input
-     * @param output
-     */
-    private Object[] traverseObjectList(String path, Object[] input, List<Map<String,Object>> output){
+    private void traverseParentMap(Map<String,Object> input, String path, List<Map<String,Object>> dataRows){
         
-        Map<String,Object> unknownAttributes =  new Map<String,Object>();
-
-        // If there are values that are not objects and do not have a key/value pair structure
-        // the will be put into a "unknown attributes" map that can be transformed into table columns
-        Integer attributeCounter = 0;
-
-        // Iterate each object in the list that will transform into a data row
-        for (Integer i = 0, max=input.size(); i < max; i++) {
+        // Create a new row for the parent
+        Map<String,Object> row = new Map<String,Object>();
+        
+        // Iterate each key in the input map
+        for(String key : input.keySet()){		
             
-            if(input[i] instanceof Map<String,Object>){
-                
-                output.add(
-                    this.traverseObjectMap(
-                        path,
-                        (Map<String,Object>) input[i],
-                        new Map<String,Object>()
-                    )
-                );
+            // Continue if a property needs to be ignored
+            if(this.hasAttributeFilter && this.attributeFilter.contains(key)){continue;}
 
-            }else if(input[i] instanceof Object[]){
-                
-                // If lists are ignored, skip to the next record
-                if(!this.includeChildLists){continue;}
-
-                
-                String pathKey = ( String.isNotBlank(path) ? path + '.' : '') +  String.valueOf(attributeCounter);
-
-                this.columnNames.add(pathKey);
-                attributeCounter++;
-
-                // create a new map
-                // each value from this list is added
-                
-                //output.add(this.handleList((Object[])input[i]));
-
-                for( Object woot : this.traverseObjectList(
-                    pathKey,
-                    (Object[]) input[i],
-                    new List<Map<String,Object>>()
-                )){
-                    output.add((Map<String,Object>)woot);
-                }
-                
-                
-            }else{
-
-                String pathKey = String.valueOf(attributeCounter);
-
-                this.columnNames.add(pathKey);
-
-                attributeCounter++;
-
-                // If there is a list with unknown attributes it will be added here i.e. [1,2,3]
-                // will become [{"attr0" : 1}, {"attr0" : 2}, {"attr2" : 3}]
-                // So this translates into 3 columns with values and unknow attribute name
-                unknownAttributes.put(
-                     pathKey,input[i]
-                );
-                
-            }
+            // Traverse all children
+            traverseChild(input.get(key), ((String.isNotBlank(path)) ? path + '.' + key : key), row, dataRows, false, 0);
         }
-
-        // Collect all attributes and add them to the output
-        if(!unknownAttributes.isEmpty()){
-           output.add(unknownAttributes);
-        }
-        return output;
+        
+        // Add the row to the table
+        if(!row.isEmpty()){dataRows.add(row);}
     }
 
-    /**
-     * @description Additional handling so that nested lists containing values can be handled
-     *              i.e. [[1,2,3],["a","b","c"]]
-     */
-    private Map<String,Object> handleList(Object[] input){
-        Integer counter = 0;
-        Map<String,Object> output = new Map<String,Object>();
-        for(Object o : input){
+
+    private void traverseParentList(Object[] input, String path, List<Map<String,Object>> dataRows){
             
-            if(o instanceOf Object[]){
-                
-                output.putAll(this.handleList((Object[]) o));
-                
-
-            }else if(o instanceOf Map<String,Object>){
-
-                output.putAll(this.traverseObjectMap(
-                    '',
-                    (Map<String,Object>) o,
-                    new Map<String,Object>()
-                ));
-
+        // Create a new row to combine the values in the list
+        Map<String,Object> row = new Map<String,Object>();
+        
+        // Some values in the list do not have a key, in this cases we need to use the index
+        // i.e. the data looks like ["a","b","c", "d"]
+        Integer objectIndex = 0;
+        
+        // Having this type casting again seems redundant, but doing the check in here
+        // saves having to do it twice, what on 10k+ statements gives a small performance improvement
+        for(Integer i=0, max=input.size();i<max;i++){
+            if(input[i] instanceof Map<String,Object>){
+                traverseChildMap((Map<String,Object>) input[i], path, row, dataRows, false, null);
+            }else if(input[i] instanceof Object[]){
+                traverseChildList(         (Object[]) input[i], path, row, dataRows, false, null);
             }else{
-                output.put(String.valueOf(counter),String.valueOf(o));
-            }
-            counter++;
+                traverseChildObject(                  input[i], path, row, dataRows, true, objectIndex);
+                objectIndex++;
+            }	
         }
-        return output;
+        
+        // Add the row to the table
+        if(!row.isEmpty()){dataRows.add(row);}
+    }
+
+
+    /**
+     * @description Method to handle a parent object like a Number, String or Boolean
+     *              'true', ''"String"'', '123' are all valid JSON Strings, this method
+     *              accomodates single value JSON just in case
+     */ 
+    private void traverseParentObject(Object input, String path, List<Map<String,Object>> dataRows){
+        // Add the column name
+        this.columnNames.add(String.valueOf(0));
+        
+        // Add the single value to the output
+        dataRows.add(
+            new Map<String,Object>{
+                String.valueOf(0) => input
+            }
+        );
+    }
+
+
+    /**
+     * @description Child selector method, this method splits out the wat a child record needs to be handled
+     *              based on the type. This makes sure the least amount of type casting has to be done.
+     */
+    private void traverseChild(Object input, String path, Map<String,Object> row, List<Map<String,Object>> dataRows, Boolean isObjectInlist, Integer objectIndex){
+        if(input instanceof Object[]){
+           
+            // Allow top level lists names to be filtered out
+            path = this.hasListNameFilter && this.listNameFilter.contains(path) && !path?.contains('.') ? '' : path;
+ 
+            traverseChildList((Object[]) input, path, row,dataRows, isObjectInlist, objectIndex);
+        }else if(input instanceof Map<String,Object>){
+            traverseChildMap((Map<String,Object>) input, path, row, dataRows, isObjectInlist, objectIndex);
+        }else{
+            traverseChildObject(input, path, row, dataRows, isObjectInlist, objectIndex);
+        }
+    }
+
+
+    private void traverseChildMap(Map<String,Object> input, String path, Map<String,Object> row, List<Map<String,Object>> dataRows, Boolean isObjectInlist, Integer objectIndex){
+        for(String key : input.keySet() ){
+
+            // Continue if a property needs to be ignored
+            if(this.hasAttributeFilter && this.attributeFilter.contains(key)){continue;}
+        
+            // Traverse self for each child record
+            traverseChild(input.get(key), ((String.isNotBlank(path)) ? path + '.' + key : key), row, dataRows, isObjectInlist, objectIndex);
+        }
+    }
+
+
+    private void traverseChildList(Object[] input, String path, Map<String,Object> row, List<Map<String,Object>> dataRows, Boolean isObjectInlist, Integer objectIndex){
+            
+        // Allow to filter out certain list names. Note that this can have some funky results
+        // Each list should be added as new records, so handle the list as a PARENT
+        traverseParentList(
+            input,
+            (this.hasListNameFilter && this.listNameFilter.contains(path?.substringAfterLast('.'))) ? path?.substringBeforeLast('.') : path,
+            dataRows
+        );
+    }
+
+
+    private void traverseChildObject(Object input, String path, Map<String,Object> row, List<Map<String,Object>> dataRows, Boolean isObjectInlist, Integer objectIndex){
+        
+        // Extract the path so it can be added in to the column names
+        path = (isObjectInlist) ? ((String.isNotBlank(path)) ? path + '.' + objectIndex : String.valueOf(objectIndex)) : path;
+        
+        // If the object is in a list we need to add the list index as a key
+        this.columnNames.add(path);
+        
+        // Add the value to the row		
+        row.put(path,input);
     }
 }

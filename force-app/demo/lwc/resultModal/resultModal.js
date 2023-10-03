@@ -22,7 +22,7 @@ export default class ResultModal extends LightningModal {
             let box = this.template.querySelector("lightning-modal-body")
             let tableWrapper = this.template.querySelector(".tableWrapper");
             tableWrapper.style.height = null;
-            tableWrapper.style.height = (box.offsetHeight - 44) + "px";
+            tableWrapper.style.height = (box.offsetHeight - 30) + "px";
         }catch(error){
             console.log(error.message);
         }
@@ -37,7 +37,7 @@ export default class ResultModal extends LightningModal {
                 let box = this.template.querySelector("lightning-modal-body")
                 let tableWrapper = this.template.querySelector(".tableWrapper");
                 tableWrapper.style.height = null;
-                tableWrapper.style.height = (box.offsetHeight - 44) + "px";
+                tableWrapper.style.height = (box.offsetHeight - 30) + "px";
             }, 500);
             
         }catch(error){

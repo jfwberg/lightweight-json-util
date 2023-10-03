@@ -17,10 +17,11 @@ export default class JsonTable extends LightningModal {
     width;
 
     // Configuration attributes for our data table creation
-    jsonString = '';
-    attributeFilter = "attributes, totalSize, done, nextRecordsUrl"
-    includeChildLists = true;
-    hideChildListAttributeFromPath = true;
+    jsonString       = "";
+    attributeFilter  = "attributes, totalSize, done, nextRecordsUrl"
+    includeChildLists= true;
+    listNameFilter   = "records";
+    startPath        = "";
 
 
     /** **************************************************************************************************** **
@@ -31,11 +32,12 @@ export default class JsonTable extends LightningModal {
         this.loading =true;
 			
         createTable({ 
-            jsonString                     : this.jsonString,
-            attributeFilter                : this.attributeFilter,
-            hideChildListAttributeFromPath : this.hideChildListAttributeFromPath,
-            includeChildLists              : this.includeChildLists,
-            cacheBust                      : this._cacheBust
+            jsonString        : this.jsonString,
+            attributeFilter   : this.attributeFilter,
+            listNameFilter    : this.listNameFilter,
+            includeChildLists : this.includeChildLists,
+            path              : this.startPath,
+            cacheBust         : this._cacheBust
         })
         .then(data => {
             try{
@@ -83,11 +85,12 @@ export default class JsonTable extends LightningModal {
         this.loading =true;
 			
         createCsv({ 
-            jsonString: this.jsonString,
-            attributeFilter : this.attributeFilter,
-            hideChildListAttributeFromPath : this.hideChildListAttributeFromPath,
+            jsonString        : this.jsonString,
+            attributeFilter   : this.attributeFilter,
+            listNameFilter    : this.listNameFilter,
             includeChildLists : this.includeChildLists,
-            cacheBust: this._cacheBust
+            path              : this.startPath,
+            cacheBust         : this._cacheBust
         })
         .then(data => {
             try{
@@ -149,12 +152,16 @@ export default class JsonTable extends LightningModal {
     }
 
 
-    handleChangeHideChildListAttributeFromPath(event){
-        this.hideChildListAttributeFromPath = event.target.checked;
+    handleChangeListNameFilter(event){
+        this.listNameFilter = event.target.value;
     }
 
 
     handleChangeIncludeChildLists(event){
         this.includeChildLists = event.target.checked;
+    }
+
+    handleChangeStartPath(event){
+        this.startPath = event.target.value;
     }
 }

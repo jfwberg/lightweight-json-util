@@ -117,7 +117,7 @@ private with sharing class JsnTest {
 
         // Assert account records
         Assert.areEqual(
-            2,
+            10,
             accRecords.size(),
             'Unexpected number of account records'
         );

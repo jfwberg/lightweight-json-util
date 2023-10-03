@@ -15,7 +15,7 @@ export default class CsvResultModal extends LightningModal {
             let box = this.template.querySelector("lightning-modal-body")
             let csvWrapper = this.template.querySelector(".csvWrapper");
             csvWrapper.style.height = null;
-            csvWrapper.style.height = (box.offsetHeight - 44) + "px";
+            csvWrapper.style.height = (box.offsetHeight - 30) + "px";
         }catch(error){
             console.log(error.message);
         }
@@ -30,7 +30,7 @@ export default class CsvResultModal extends LightningModal {
                 let box = this.template.querySelector("lightning-modal-body")
                 let csvWrapper = this.template.querySelector(".csvWrapper");
                 csvWrapper.style.height = null;
-                csvWrapper.style.height = (box.offsetHeight - 44) + "px";
+                csvWrapper.style.height = (box.offsetHeight - 30) + "px";
             }, 500);
         }catch(error){
             console.log(error.message);

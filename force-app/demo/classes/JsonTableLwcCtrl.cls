@@ -1,51 +1,22 @@
 public with sharing class JsonTableLwcCtrl {
 
     @AuraEnabled
-    public static Map<String,Object> createTable(String jsonString, String attributeFilter, Boolean hideChildListAttributeFromPath, Boolean includeChildLists, String cacheBust){
-        try {
-            // The filter set
-            Set<String> attributeFilterSet;
-            
-            // Populate the attribute filter
-            if(String.isNotBlank(attributeFilter)){
-                attributeFilterSet = new Set<String>{};
-                for(String attribute : attributeFilter.split(',')){
-                    attributeFilterSet.add(attribute?.trim());
-                }
-            }
-
-            // Create a new table
-            utl.JsnTbl table = new utl.JsnTbl()
-                .setIncludeChildLists(includeChildLists)
-                .setHideChildListAttributeFromPath(hideChildListAttributeFromPath)
-                .setAttributeFilter(attributeFilterSet)
-            ;
-
-            // Handle as a list or as a string
-            if(jsonString.startsWith('[')){
-                table.createFromObjectList((Object[])JSON.deserializeUntyped(jsonString));
-            }else if(jsonString.startsWith('{')){
-                table.createFromObjectMap((Map<String,Object>)JSON.deserializeUntyped(jsonString));
-            }else{
-                throw new StringException('Only JSON lists and objects are supported.');
-            }
-
-            // return the data and columns
-            return new Map<String,Object>{
-                'columns' => table.getColumnNames(),
-                'data'    => table.getKeyValueData()
-            };
-        } catch (Exception e) {
-            throw new AuraHandledException(e.getMessage());
-        }
+    public static Map<String,Object> createTable(String jsonString, String attributeFilter, String listNameFilter, Boolean includeChildLists, String path, String cacheBust){
+        return (Map<String,Object> ) createOutput(jsonString, attributeFilter, listNameFilter, includeChildLists, path, false);  
     }
 
 
     @AuraEnabled
-    public static String createCsv(String jsonString, String attributeFilter, Boolean hideChildListAttributeFromPath, Boolean includeChildLists, String cacheBust){
+    public static String createCsv(String jsonString, String attributeFilter, String listNameFilter, Boolean includeChildLists, String path, String cacheBust){
+       return (String ) createOutput(jsonString, attributeFilter, listNameFilter, includeChildLists, path, true);  
+    }
+
+    
+    private static Object createOutput(String jsonString, String attributeFilter, String listNameFilter, Boolean includeChildLists, String path, Boolean returnCsv){
         try {
-            // The filter set
+            // The filter sets
             Set<String> attributeFilterSet;
+            Set<String> listNameFilterSet;
             
             // Populate the attribute filter
             if(String.isNotBlank(attributeFilter)){
@@ -55,27 +26,34 @@ public with sharing class JsonTableLwcCtrl {
                 }
             }
 
+            // Populate the list name filter
+            if(String.isNotBlank(listNameFilter)){
+                listNameFilterSet = new Set<String>{};
+                for(String listName : listNameFilter.split(',')){
+                    listNameFilterSet.add(listName?.trim());
+                }
+            }
+
             // Create a new table
             utl.JsnTbl table = new utl.JsnTbl()
                 .setIncludeChildLists(includeChildLists)
-                .setHideChildListAttributeFromPath(hideChildListAttributeFromPath)
+                .setListNameFilter(listNameFilterSet)
                 .setAttributeFilter(attributeFilterSet)
+                .create(JSON.deserializeUntyped(jsonString))
             ;
 
-            // Handle as a list or as a string
-            if(jsonString.startsWith('[')){
-                table.createFromObjectList((Object[])JSON.deserializeUntyped(jsonString));
-            }else if(jsonString.startsWith('{')){
-                table.createFromObjectMap((Map<String,Object>)JSON.deserializeUntyped(jsonString));
+
+            // return the csv or the data and columns
+            if(returnCsv){
+                return table.getCsvString();
             }else{
-                throw new StringException('Only JSON lists and objects are supported.');
+                return new Map<String,Object>{
+                    'columns' => table.getColumnNames(),
+                    'data'    => table.getKeyValueData()
+                };
             }
-
-            // return the data and columns
-            return table.getCsvString();
-
-        } catch (Exception e) {
-            throw new AuraHandledException(e.getMessage());
+        }catch (Exception e) {
+            throw new AuraHandledException(e.getMessage() + e.getStackTraceString());
         }
     }
 }
