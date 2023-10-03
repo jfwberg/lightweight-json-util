@@ -4,7 +4,9 @@
 
 
 // set column names as well
-// use global list, not the passed in list
+// performance test
+// apex docs
+// include child lists options
 
 global with sharing class JsnTbl {
    
@@ -100,7 +102,7 @@ global with sharing class JsnTbl {
         this.hasListNameFilter  = (listNameFilter != null) && !this.listNameFilter.isEmpty();
         
         // Execute logic
-        this.traverseParent(input, null, this.keyValueData);
+        this.traverseParent(input, null);
         
         // Create the revised column index
         this.createColumnIndexMap();
@@ -281,61 +283,67 @@ global with sharing class JsnTbl {
      * @description Parent selector method, this method splits out how the top level record needs to be handled
      *              based on the type. This makes sure the least amount of type casting has to be done.
      */
-    private void traverseParent(Object input, String path, List<Map<String,Object>> dataRows){
+    private void traverseParent(Object input, String path){
         if(input instanceof Map<String,Object>){
-            traverseParentMap((Map<String,Object>)input, path, dataRows);
+            traverseParentMap((Map<String,Object>)input, path);
         }else if(input instanceof Object[]){
-            traverseParentList(        (Object[]) input, path, dataRows);
+            traverseParentList(        (Object[]) input, path);
         }else{
-            traverseParentObject(                 input, path, dataRows);
+            traverseParentObject(                 input, path);
         }
     }
 
 
-    private void traverseParentMap(Map<String,Object> input, String path, List<Map<String,Object>> dataRows){
-        
-        // Create a new row for the parent
-        Map<String,Object> row = new Map<String,Object>();
-        
-        // Iterate each key in the input map
+    private void traverseParentMap(Map<String,Object> input, String path){
         for(String key : input.keySet()){		
+
+            // Create a new row for the parent
+            Map<String,Object> row = new Map<String,Object>();
             
             // Continue if a property needs to be ignored
             if(this.hasAttributeFilter && this.attributeFilter.contains(key)){continue;}
 
             // Traverse all children
-            traverseChild(input.get(key), ((String.isNotBlank(path)) ? path + '.' + key : key), row, dataRows, false, 0);
+            traverseChild(input.get(key), ((String.isNotBlank(path)) ? path + '.' + key : key), row, false, 0);
+
+            // Add the row to the table
+            if(!row.isEmpty()){this.keyValueData.add(row);}
         }
-        
-        // Add the row to the table
-        if(!row.isEmpty()){dataRows.add(row);}
     }
 
 
-    private void traverseParentList(Object[] input, String path, List<Map<String,Object>> dataRows){
-            
-        // Create a new row to combine the values in the list
-        Map<String,Object> row = new Map<String,Object>();
-        
+    private void traverseParentList(Object[] input, String path){
+
         // Some values in the list do not have a key, in this cases we need to use the index
         // i.e. the data looks like ["a","b","c", "d"]
         Integer objectIndex = 0;
         
+        // In order to bundle the values without an attributes, create a single row
+        Map<String,Object> attributeLessValuesRow = new Map<String,Object>();
+
         // Having this type casting again seems redundant, but doing the check in here
         // saves having to do it twice, what on 10k+ statements gives a small performance improvement
         for(Integer i=0, max=input.size();i<max;i++){
+            
+            // Create a new row to combine the values in the list
+            Map<String,Object> row = new Map<String,Object>();
+
+            // Handle each child object according to it's type
             if(input[i] instanceof Map<String,Object>){
-                traverseChildMap((Map<String,Object>) input[i], path, row, dataRows, false, null);
+                traverseChildMap((Map<String,Object>) input[i], path, row, false, null);
             }else if(input[i] instanceof Object[]){
-                traverseChildList(         (Object[]) input[i], path, row, dataRows, false, null);
+                traverseChildList(         (Object[]) input[i], path, row, false, null);
             }else{
-                traverseChildObject(                  input[i], path, row, dataRows, true, objectIndex);
+                traverseChildObject(                  input[i], path, attributeLessValuesRow, true, objectIndex);
                 objectIndex++;
             }	
+            
+            // Add the row to the table
+            if(!row.isEmpty()){this.keyValueData.add(row);}
         }
-        
+
         // Add the row to the table
-        if(!row.isEmpty()){dataRows.add(row);}
+        if(!attributeLessValuesRow.isEmpty()){this.keyValueData.add(attributeLessValuesRow);}
     }
 
 
@@ -344,12 +352,12 @@ global with sharing class JsnTbl {
      *              'true', ''"String"'', '123' are all valid JSON Strings, this method
      *              accomodates single value JSON just in case
      */ 
-    private void traverseParentObject(Object input, String path, List<Map<String,Object>> dataRows){
+    private void traverseParentObject(Object input, String path){
         // Add the column name
         this.columnNames.add(String.valueOf(0));
         
         // Add the single value to the output
-        dataRows.add(
+        this.keyValueData.add(
             new Map<String,Object>{
                 String.valueOf(0) => input
             }
@@ -361,46 +369,45 @@ global with sharing class JsnTbl {
      * @description Child selector method, this method splits out the wat a child record needs to be handled
      *              based on the type. This makes sure the least amount of type casting has to be done.
      */
-    private void traverseChild(Object input, String path, Map<String,Object> row, List<Map<String,Object>> dataRows, Boolean isObjectInlist, Integer objectIndex){
+    private void traverseChild(Object input, String path, Map<String,Object> row, Boolean isObjectInlist, Integer objectIndex){
         if(input instanceof Object[]){
            
             // Allow top level lists names to be filtered out
             path = this.hasListNameFilter && this.listNameFilter.contains(path) && !path?.contains('.') ? '' : path;
  
-            traverseChildList((Object[]) input, path, row,dataRows, isObjectInlist, objectIndex);
+            traverseChildList((Object[]) input, path, row, isObjectInlist, objectIndex);
         }else if(input instanceof Map<String,Object>){
-            traverseChildMap((Map<String,Object>) input, path, row, dataRows, isObjectInlist, objectIndex);
+            traverseChildMap((Map<String,Object>) input, path, row, isObjectInlist, objectIndex);
         }else{
-            traverseChildObject(input, path, row, dataRows, isObjectInlist, objectIndex);
+            traverseChildObject(input, path, row, isObjectInlist, objectIndex);
         }
     }
 
 
-    private void traverseChildMap(Map<String,Object> input, String path, Map<String,Object> row, List<Map<String,Object>> dataRows, Boolean isObjectInlist, Integer objectIndex){
+    private void traverseChildMap(Map<String,Object> input, String path, Map<String,Object> row, Boolean isObjectInlist, Integer objectIndex){
         for(String key : input.keySet() ){
 
             // Continue if a property needs to be ignored
             if(this.hasAttributeFilter && this.attributeFilter.contains(key)){continue;}
         
             // Traverse self for each child record
-            traverseChild(input.get(key), ((String.isNotBlank(path)) ? path + '.' + key : key), row, dataRows, isObjectInlist, objectIndex);
+            traverseChild(input.get(key), ((String.isNotBlank(path)) ? path + '.' + key : key), row, isObjectInlist, objectIndex);
         }
     }
 
 
-    private void traverseChildList(Object[] input, String path, Map<String,Object> row, List<Map<String,Object>> dataRows, Boolean isObjectInlist, Integer objectIndex){
+    private void traverseChildList(Object[] input, String path, Map<String,Object> row, Boolean isObjectInlist, Integer objectIndex){
             
         // Allow to filter out certain list names. Note that this can have some funky results
         // Each list should be added as new records, so handle the list as a PARENT
         traverseParentList(
             input,
-            (this.hasListNameFilter && this.listNameFilter.contains(path?.substringAfterLast('.'))) ? path?.substringBeforeLast('.') : path,
-            dataRows
+            (this.hasListNameFilter && this.listNameFilter.contains(path?.substringAfterLast('.'))) ? path?.substringBeforeLast('.') : path
         );
     }
 
 
-    private void traverseChildObject(Object input, String path, Map<String,Object> row, List<Map<String,Object>> dataRows, Boolean isObjectInlist, Integer objectIndex){
+    private void traverseChildObject(Object input, String path, Map<String,Object> row, Boolean isObjectInlist, Integer objectIndex){
         
         // Extract the path so it can be added in to the column names
         path = (isObjectInlist) ? ((String.isNotBlank(path)) ? path + '.' + objectIndex : String.valueOf(objectIndex)) : path;
