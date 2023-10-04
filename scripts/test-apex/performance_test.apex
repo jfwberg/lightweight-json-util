@@ -1,10 +1,8 @@
 /**
- * DATA    : 1000 Accounts with 10 Contacts each
- * TEST 01 : Fetching the result.records[].Contacts.records[].Owner.Profile.Name
- *           for 10k records and add them to an Object Maps
- * VARIANT : Using the Lightweight - JSON Util methods
- * RESULT  : AVG CPU Time : 425 (100 tests)
- *           Heap Size    : 139
+ * DATA    : 1000 Accounts with 10 Contacts and 10 Oppoertunities each each
+ * TEST 01 : Check performance of creating a table with 21k rows from a JSON response
+ * RESULT  : AVG CPU Time : 911
+ *           Heap Size    : 1,610,406
  */
 // Query configuration
 String  query  = 'SELECT Id, Name, Owner.Name, Owner.Profile.Name, ';
@@ -14,48 +12,25 @@ String  query  = 'SELECT Id, Name, Owner.Name, Owner.Profile.Name, ';
 
 String  jsonString = getQueryResponseBody(query, false);
 
+
 try{
-    // Hold the CPU Time values for each test
-    Integer[] CpuTimes = new Integer[]{};
+ 	// Register the starting limits
+    Integer startCpuTime = Limits.getCpuTime();
+    Integer startHeapSize= Limits.getHeapSize();
+	
+	// Create a basic table
+	utl.JsnTbl table = new utl.JsnTbl()
+    	.create(JSON.deserializeUntyped(jsonString))
+	;
 
-    // Run the test X amount of times
-    for (Integer i = 0; i < 10; i++) {
-        
-        // Data test set
-        Set<Object> recordOwnerNames =  new Set<Object>{};
-        
-        // Register the starting limits
-        Integer startCpuTime = Limits.getCpuTime();
-        Integer startHeapSize= Limits.getHeapSize();
+	Integer endCpuTime  = Limits.getCpuTime();
+    Integer endHeapSize = Limits.getHeapSize();
 
-        // Iterate the account records
-        for(Object accountRecord : utl.JSN.getObjectList('records', (Map<String,Object>) JSON.deserializeUntyped(jsonString))){
-
-            // Iterate the contact records
-            for(Object contactRecord : utl.JSN.getObjectList('Contacts.records', (Map<String,Object>) accountRecord)){
-
-                // Finally add the profile name to the list
-                recordOwnerNames.add(utl.JSN.getObject('Owner.Profile.Name', (Map<String,Object>) contactRecord));
-            }
-        }
-
-        Integer endCpuTime  = Limits.getCpuTime();
-        Integer endHeapSize = Limits.getHeapSize();
-
-        // Output the limits info for performance measuring
-        System.debug('CPU Time : ' + (endCpuTime - startCpuTime));
-        System.debug('Heap size: ' + (endHeapSize - startHeapSize));
-
-        // Add the test data to the list
-        CpuTimes.add(endCpuTime - startCpuTime);
-    }
-
-    Integer total=0;
-    for (Integer i = 0, max = CpuTimes.size(); i < max; i++) {
-        total+=CpuTimes[i];
-    }
-    System.debug((Decimal)total/CpuTimes.size());
-
+	// Output the limits info for performance measuring
+	System.debug('CPU Time : ' + (endCpuTime - startCpuTime));
+	System.debug('Heap size: ' + (endHeapSize - startHeapSize));
+	
+	
 }catch(System.JSONException e){
     System.debug('Invalid JSON detected: ' + e.getMessage());
 }

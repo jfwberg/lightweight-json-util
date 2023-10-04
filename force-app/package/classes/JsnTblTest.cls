@@ -6,7 +6,7 @@ private with sharing class JsnTblTest {
     static void testDataTableWithNestedLists(){
         
         JsnTbl jsnTbl = new JsnTbl()
-            .createFromObjectList((object[]) JSON.deserializeUntyped('[[1],[2],[3],{"a" : "b"}]'))
+            .create(JSON.deserializeUntyped('[[1],[2],[3],{"a" : "b"}]'))
         ;
 
         // There should be 1 result
@@ -25,7 +25,7 @@ private with sharing class JsnTblTest {
     static void testDataTableWithNestedObjects(){
         
         JsnTbl jsnTbl = new JsnTbl()
-        .createFromObjectMap((Map<String,Object>) JSON.deserializeUntyped('{"obj1" : {"a" : 1, "b" : 2}, "obj2" : {"y" : 25, "z" : 26, "e" : {"f" : 6} }, "obj3" : [1,2,3]}'))
+        .create(JSON.deserializeUntyped('{"obj1" : {"a" : 1, "b" : 2}, "obj2" : {"y" : 25, "z" : 26, "e" : {"f" : 6} }, "obj3" : [1,2,3]}'))
         ;
 /*
         // There should be 1 result

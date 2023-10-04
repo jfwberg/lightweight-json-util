@@ -35,7 +35,7 @@ for(Object accountRecord : utl.Jsn.getObjectList('records', (Map<String,Object>)
 }
 ```
 
-## Methods to geerate Data Table or a CSV formats
+## Methods to generate Data Table or a CSV formats
 The ```JsnTbl``` class allows you to automatically convert your input JSON Object Maps to flat data table structutes that can be used in Apex, Flow, LWC or Visualforce.
 
 The goal is to combine nested JSON into a flat table type and combine the headers in a dot type notation and optimise it for Salesforce REST API Query Result format, but still keep it usable for any result format, like Date Cloud Queries.
@@ -60,18 +60,39 @@ This results into a table that looks like this
 |Name|Owner.Name|Owner.Profile.Name|
 |--------|-------------|-----------|
 |My First Account|Henk de Vries||
-|My Second Account|Henk de Bruin|Owner.Profile.Name|
+|My Second Account|Henk de Bruin|System Administrator|
 
 
-The Column headers are stored in the order they appear in the JSON and cannot be sorted or filtered through this library. This will require some additional custom logic.
+It also works with a Data Cloud API format where you have an indexed set of result. This is a bit more tricky to handle as there are no key/column names that you can use.
+
+To overcome this issue, the table headers will be numbered based on the index they have in a list
+
+```json
+[
+    ["a","b","c"],
+    ["d","e","f","g","h"],
+    ["i","j"]
+]
+```
+This results into a table that looks like this. There is a method ```updateColumnNames(Set<String>)``` that allow you to override the column names so you can set them yourself
+|0|1|2|3|4|
+|-|-|-|-|-|
+|a|b|c|
+|d|e|f|g|h|
+|i|j|
+
+
+Column headers are stored in the order they appear in the JSON and cannot be sorted or filtered through this library. This will require some additional custom logic.
 
 ## Output (table) formats
 |Type|format Example|Data Type|Note|
 |--------|-------------|---|---|
 |Key Value Pairs|```[{"row_1_col_1" : "row_1_col_1_value", "row_1_col_2" : "row_1_col_2_value"}, {"row_2_col_1" : "row_2_col_1_value", "row_2_col_2" : "row_2_col_2_value"}]``` | ```List<Map<String,Object>>```| Ideal for Javascript handling
-|Indexed        |```[["row_1_col_1_value","row_1_col_2_value"],["row_2_col_1_value","row_2_col_2_value"]]``` |```List<List<Object>>```|Allows for the use of matrix indexes i.e. ```value = table[1][19]```|
+|Indexed Data   |```[["row_1_col_1_value","row_1_col_2_value"],["row_2_col_1_value","row_2_col_2_value"]]``` |```List<List<Object>>```|Allows for the use of matrix indexes i.e. ```value = table[1][19]```|
 |CSV Data       |```[["header_col_1","header_col_2"],["row_1_col_1_value","row_1_col_2_value"],["row_2_col_1_value","row_2_col_2_value"]]``` |```List<List<String>>```|Same as Indexed but all values are Strings and CSV escaped|
 |CSV String     |```"header_col_1", "header_col_2" <br/> "row_1_col_1_value","row_1_col_2_value" <br/> "row_2_col_1_value","row_2_col_2_value"``` |```String```|CSV data converted to a usable CSV string|
+|Console String |```"header_col_1", "header_col_2" <br/> "row_1_col_1_value","row_1_col_2_value" <br/> "row_2_col_1_value","row_2_col_2_value"``` |```String```|Table data converted to a human readable spaced string that is readable in a console, this is mainly for debugging and previewing purposes|
+
 
 ## Create a JSON Data Table
 ### Construct
@@ -85,18 +106,17 @@ A JSON Data table is configured using a number of methods to override the defaul
 
 | Method | Description |Default|
 |--------|-------------|-------------|
-| ```setIncludeChildLists(Boolean)```             | Includes nested list objects. I.e. if you have sub query results, these will be included | true |
-| ```setAddChildListsAsTables(Boolean)```         | When set to true, each child list is handled a nested JsnTbl Object. This is handy when you want to create displays that have nested tables with their own headers.<br />Set to false to join child lists to the main flat table as individual columns. Note that if this is set to true you are unable to generate indexed or CSV tables.|false|
-| ```setHideChildListAttributeFromPath(Boolean)```| When set to true, the name of the attribute containing the child list is removed. I.e. if the list attribute name is *records* like "Contacts.records.FistName", the list name is removed resulting in: "Contacts.FirstName"<br /> This is really handy when you are working with the Salesforce Query Rest API to get Clean results like "Contacts.Owner.Profile.Name" |true|
-| ```setAttributeFilter(Set<String>)```           | This allows you to specify attributes names you want to filter out. For example if you work with Salesforce REST API Query results, you might want to filter out the attributes and query result details for display purposes and only show the data attributes. You can do that using a filter like:  ```new Set<String>{'attributes', 'totalSize', 'done'}``` |null|
+| ```setListNameFilter(Set<String>)```  | This allows you to remove the name from attributes containing a child list. I.e. if the list attribute name is *records* like "Contacts.records.FistName", the list name is removed resulting in: "Contacts.FirstName"<br /> This is really handy when you are working with the Salesforce Query Rest API to get Clean results like "Contacts.Owner.Profile.Name" |true|
+| ```setAttributeFilter(Set<String>)``` | This allows you to specify attributes names you want to filter out. For example if you work with Salesforce REST API Query results, you might want to filter out the attributes and query result details for display purposes and only show the data attributes. You can do that using a filter like:  ```new Set<String>{'attributes', 'totalSize', 'done'}``` |null|
 
 ### Create
 Once you have setup your class you're now ready to create the data content with the configuration
 
 | Method | Description |
 |--------|-------------|
-| ```createFromObjectList(List<Object>)```      | Create your table from an Object List (preferred starting point) |
-| ```createFromObjectMap(Map<String,Object>)``` | Create your table from an Object Map |
+| ```create(Object)```                 | Create your table from an Object List, this will usually be ```JSON.deserializeUntyped(jsonString)```. But you can typecast the response as well|
+| ```updateColumnNames(Set<String>)``` | This needs to run after the create method. It allows you to set your own column names. These need to be in order of the map.|
+
 
 
 ### Use
@@ -107,19 +127,21 @@ Once your table is created you can now extract the data using one of the followi
 | ```getIndexedData()```       | ```List<Object[]>```           |Get a multi-dimentional array data structure|
 | ```getCsvData()```           | ```List<String[]>```           |Get a multi-dimentional array with header row and csv encoded values|
 | ```getCsvString()```         | ```String```                   |Get a CSV formatted String|
+| ```getConsoleString()```     | ```String```                   |Get a human readable formatted table with equally spaced out columns based on the largest value |
 | ```getColumnNames()```       | ```String[]```                 |Get a list of column names in the order of the JSON input|
 | ```getColumnNameIndexMap()```| ```Map<String,Integer>```      |Get a mapping between the column header name and the location of the column|
 
-
+## Examples
 ### Full example usising an Object map as input
 ```java
+String jsonString = '[{"records" : [[1,2,3],[4,5,6]], "mapData" : {"TopLevel" : "data", "child" : {"Name" : "myChild"}}, "done" : true}]';
+
 // Create a data table from a Salesforce API query response
 utl.JsnTbl table = new utl.JsnTbl()
-    .setIncludeChildLists(true)
-    .setAddChildListsAsTables(false)
-    .setHideChildListAttributeFromPath(true)
-    .setAttributeFilter(new Set<String>{'attributes', 'done'})
-    .createFromObjectList((Object[]) ((Map<String,Object>)JSON.deserializeUntyped(jsonString)).get('records'))
+    .setListNameFilter(new Set<String>{'records'})
+    .setAttributeFilter(new Set<String>{'done'})
+    .create(JSON.deserializeUntyped(jsonString))
+	.updateColumnNames(new Set<String>{'Column A', 'Column B', 'Column C'})
 ;
 
 // Methods to get the data type you require
@@ -127,34 +149,58 @@ List<Map<String,Object>> keyValueData   = table.getKeyValueData();
 List<Object[]>           indexedData    = table.getIndexedData();
 List<String[]>           csvData        = table.getCsvData();
 String                   csvFile        = table.getCsvString();
+String                   consoleData    = table.getConsoleString();
 	
 // Methods to get column info
 String[]                 columnNames    = table.getColumnNames();
 Map<String,Integer>      columnIndexMap = table.getColumnNameIndexMap();
+
+System.debug(consoleData);
+```
+This outputs:
+```txt
+COLUMN A  COLUMN B  COLUMN C  MAPDATA.TOPLEVEL  MAPDATA.CHILD.NAME  
+1         2         3                                               
+4         5         6                                               
+                              data              myChild                   
 ```
 
-### Default values example using Object Map as input
+## Multi Dimentional Array Example
+```java
+String jsonString = '[[1.1,1.2,1.3],[2.1,2.2,2.3],[3.1,3.2,3.3,3.4]]';
+
+// Create a data table from a Salesforce API query response
+utl.JsnTbl table = new utl.JsnTbl()
+    .create(JSON.deserializeUntyped(jsonString))
+	.updateColumnNames(new Set<String>{'Column A', 'Column B', 'Column C','Column D'})
+;
+```
+This outputs:
+```txt
+COLUMN A  COLUMN B  COLUMN C  COLUMN D  
+1.1       1.2       1.3                 
+2.1       2.2       2.3                 
+3.1       3.2       3.3       3.4       
+```
+
+
+
+### Default values example
 ```java
 utl.JsnTbl table = new utl.JsnTbl()
-    .createFromObjectMap((Map<String,Object>) JSON.deserializeUntyped(jsonString))
+    .create(JSON.deserializeUntyped(jsonString))
 ;
 
-List<Map<String,Object>> keyValueData   = table.getKeyValueData();
+List<Map<String,Object>> keyValueData = table.getKeyValueData();
 ```
 
 ### Exception handling example
 Depending on the type of exception, you might want to handle messaging slightly different for different scenarios. This example shows a way of handling the different types
 ```java
 try{
-    utl.JsnTbl table = new utl.JsnTbl()
-        .setAddChildListsAsTables(true)
-        .createFromObjectMap((Map<String,Object>) JSON.deserializeUntyped(jsonString))
-    ;
     
-    // Will thrown an exception because when child object lists are added as
-    // JsnTbl Objects, you are unable to create an indexed or Csv table
-    List<Object[]> indexedData = table.getIndexedData();
-
+    // Offending code here
+    
 }catch(Exception e){
     
     // Handle JSON related exceptions

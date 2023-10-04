@@ -1,29 +1,19 @@
 /**
  * @description A class representing a data table that can be used in LWC
  */
-
-
-// set column names as well
 // performance test
 // apex docs
-// include child lists options
+// test classes
+// package
 
 global with sharing class JsnTbl {
    
-    // user updateable variables
-    
-    // Select this option to include child lists
-    private Boolean includeChildLists = true;
-
+ 
     // Values to be ignored when creating the data table
     private Set<String> attributeFilter = new Set<String>{};
 
     // List names of this type will not be appended, this allows for a more flat table
     private Set<String> listNameFilter  = new Set<String>{};
-
-
-
-    // app variables
 
     // Indicator if there are any attributes to check
     private Boolean hasAttributeFilter = false;
@@ -52,17 +42,6 @@ global with sharing class JsnTbl {
      **                                         GLOBAL SETTER METHODS                                          **
      ** **************************************************************************************************** **/
     /**
-     * @description Method that allows you to ignore any child lists
-     *              Any properties that that is an instance of Object[] will be
-     *              filtered out. This allows for a clean table creation
-     */
-    global JsnTbl setIncludeChildLists(Boolean includeChildLists){
-        this.includeChildLists = includeChildLists;
-        return this;
-    }
-
-
-    /**
      * @description Method to enable the property filter
      *              Any properties that are part of this list will be ignored when generating
      *              the data table, so unused attributes are filtered out
@@ -84,6 +63,7 @@ global with sharing class JsnTbl {
         this.listNameFilter = listNameFilter;
         return this;
     }
+
 
     
     /** **************************************************************************************************** **
@@ -112,12 +92,41 @@ global with sharing class JsnTbl {
     }
 
 
+    /**
+     * @description Method to set your custom column names
+     *              This method should run after the create method, not that this takes
+     *              will only override the output in the headers
+     */
+    global JsnTbl updateColumnNames(Set<String> columnNames){
+
+        // Get the current column names
+        String[] oldNames = this.getColumnNames();
+        String[] newNames = new List<String>(columnNames);
+
+        // To prevent the list going out of bounds we need to create a combined list
+        // if the current list is greater than the new list
+        if(oldNames.size() > newNames.size()){
+            
+            // Pad the new column names with the left over names from existing columns
+            for(Integer i=newNames.size(),max=oldNames.size();i<max;i++){
+                newNames.add(oldNames[i]);
+            }  
+        }
+        // Update the column names
+        this.columnNames = new Set<String>(newNames);
+
+        // Return self
+        return this;
+    }
+
+
     /** **************************************************************************************************** **
      **                                       GLOBAL GETTER METHODS                                         **
      ** **************************************************************************************************** **/
     global String[] getColumnNames(){
         return new List<String>(this.columnNames);
     }
+
 
     global Map<String,Integer> getColumnNameIndexMap(){
         return this.columnIndexMap;
@@ -170,6 +179,48 @@ global with sharing class JsnTbl {
         }
         // Return all lines joined by a return character, you might want to update this based on your required output
         return String.join(csvLines, '\n');
+    }
+
+    global String getConsoleString(){
+
+        // Run creation logic for CSV
+        this.createCsvData();
+
+        // The output string
+        String table='';
+    
+        // Create a map to keep track of the column widths
+        Map<Integer,Integer> maxColumnLengthMap = new Map<Integer,Integer>();
+    
+        // Iterate rows and columns
+        for(Integer i=0,max= this.csvData.size(); i<max; i++){
+            for(Integer j=0,jmax= this.csvData[i].size(); j<jmax; j++){
+                // populate the column
+                if(!maxColumnLengthMap.containsKey(j)){
+                    maxColumnLengthMap.put(j,0);
+                }
+                // Define the length of the  this.csvData value
+                Integer length = ( this.csvData[i][j] != null) ? String.valueOf( this.csvData[i][j]).length() : 0;
+    
+                // If there is a new greatest length, update the map
+                if(length > maxColumnLengthMap.get(j)){
+                    maxColumnLengthMap.put(j,length);
+                }
+            }
+        }
+    
+        // Iterate rows and columns again and apply the correct padding and add a linebreak at the end of each line
+        for(Integer i=0,max= this.csvData.size(); i<max; i++){
+            String row = ''; 
+            for(Integer j=0,jmax= this.csvData[i].size(); j<jmax; j++){
+                row+= ( this.csvData[i][j] == null) ? ''.rightPad(maxColumnLengthMap.get(j) + 2) : String.valueOf( this.csvData[i][j]).rightPad(maxColumnLengthMap.get(j) + 2);
+            }
+            // Add the line to the table
+            table += ((i!=0) ? row :  row.toUpperCase()) +'\n';
+        }
+    
+        // Return the table 
+        return table.removeEnd('\n');
     }
 
 
