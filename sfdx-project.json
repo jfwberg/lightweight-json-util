@@ -4,8 +4,8 @@
       "path": "force-app/package",
       "default": true,
       "package": "Lightweight - JSON Util",
-      "versionName": "Version 1.0",
-      "versionNumber": "1.0.0.NEXT",
+      "versionName": "ver 0.1",
+      "versionNumber": "0.1.0.NEXT",
       "versionDescription": "A lightweight Apex utility for path based traversing of untyped Object Maps and converting JSON to a flat Data Table or CSV format"
     },
     {
@@ -22,5 +22,7 @@
   "sfdcLoginUrl": "https://login.salesforce.com",
   "sourceApiVersion": "58.0",
   "packageAliases": {
+    "Lightweight - JSON Util": "0HoP3000000006TKAQ",
+    "Lightweight - JSON Util@0.1.0-1": "04tP30000005PYrIAM"
   }
 }

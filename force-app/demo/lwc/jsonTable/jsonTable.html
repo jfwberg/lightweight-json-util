@@ -15,12 +15,17 @@
             <lightning-button-group>
                 <lightning-button 
                     variant="neutral"
-                    label="Create Table" 
+                    label="LWC Data Table" 
                     onclick={handleClickCreateTable} 
                 ></lightning-button>
                 <lightning-button 
                         variant="neutral"
-                        label="Create CSV" 
+                        label="Console Table" 
+                        onclick={handleClickCreateConsole} 
+                ></lightning-button>
+                <lightning-button 
+                        variant="neutral"
+                        label="CSV String" 
                         onclick={handleClickCreateCsv} 
                 ></lightning-button>
             </lightning-button-group>
@@ -33,16 +38,6 @@
                         <textarea id="ta" placeholder="JSON String..." class="slds-textarea ta" onchange={handleChangeJsonString}>{jsonString}</textarea>
                     </div>
                 </div>
-            </div>
-
-            <div class="slds-var-p-bottom_medium">
-                <lightning-input 
-                    type="checkbox"
-                    label="Include child lists"
-                    name="includeChildLists"
-                    checked = {includeChildLists}
-                    onchange={handleChangeIncludeChildLists}
-                ></lightning-input>
             </div>
 
             <div class="slds-var-p-bottom_medium">
@@ -75,22 +70,6 @@
                     label="Attribute filters"
                     value={attributeFilter}
                     onchange={handleChangeAttributeFilter}
-                ></lightning-input> 
-            </div>
-
-            <div class="slds-var-p-bottom_medium">
-                <span class="slds-text-title">Path</span>
-                <span class="slds-var-p-around_small slds-size_large custom-helptext">
-                    <lightning-helptext 
-                        content="Optionally set a start path in the JSON">
-                    </lightning-helptext>
-                </span>
-                <lightning-input 
-                    variant = "label-hidden"
-                    type="text"
-                    label="Start path"
-                    value={startPath}
-                    onchange={handleChangeStartPath}
                 ></lightning-input> 
             </div>
         </div>

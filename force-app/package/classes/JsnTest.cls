@@ -14,7 +14,10 @@ private with sharing class JsnTest {
     /** **************************************************************************************************** **
      **                                            TEST METHODS                                              **
      ** **************************************************************************************************** **/
-    @IsTest
+    /**
+     * @description Testing of the getObject Method
+     */
+     @IsTest
     static void testGetObject(){
         
         // Get the first sample record
@@ -128,7 +131,7 @@ private with sharing class JsnTest {
         
         // Assert contact records
         Assert.areEqual(
-            10,
+            3,
             conRecords.size(),
             'Unexpected number of contact records'
         );

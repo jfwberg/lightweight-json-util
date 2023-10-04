@@ -1,18 +1,25 @@
+@SuppressWarnings('PMD.ExcessiveParameterList')
 public with sharing class JsonTableLwcCtrl {
 
     @AuraEnabled
-    public static Map<String,Object> createTable(String jsonString, String attributeFilter, String listNameFilter, Boolean includeChildLists, String path, String cacheBust){
-        return (Map<String,Object> ) createOutput(jsonString, attributeFilter, listNameFilter, includeChildLists, path, false);  
+    public static Map<String,Object> createTable(String jsonString, String attributeFilter, String listNameFilter, String cacheBust){
+        return (Map<String,Object> ) createOutput(jsonString, attributeFilter, listNameFilter, false, false);  
     }
 
 
     @AuraEnabled
-    public static String createCsv(String jsonString, String attributeFilter, String listNameFilter, Boolean includeChildLists, String path, String cacheBust){
-       return (String ) createOutput(jsonString, attributeFilter, listNameFilter, includeChildLists, path, true);  
+    public static String createCsv(String jsonString, String attributeFilter, String listNameFilter, String cacheBust){
+       return (String ) createOutput(jsonString, attributeFilter, listNameFilter, true, false);  
+    }
+
+
+    @AuraEnabled
+    public static String createConsole(String jsonString, String attributeFilter, String listNameFilter, String cacheBust){
+       return (String ) createOutput(jsonString, attributeFilter, listNameFilter, true, true);  
     }
 
     
-    private static Object createOutput(String jsonString, String attributeFilter, String listNameFilter, Boolean includeChildLists, String path, Boolean returnCsv){
+    private static Object createOutput(String jsonString, String attributeFilter, String listNameFilter, Boolean returnCsv, Boolean returnConsole){
         try {
             // The filter sets
             Set<String> attributeFilterSet;
@@ -36,16 +43,14 @@ public with sharing class JsonTableLwcCtrl {
 
             // Create a new table
             utl.JsnTbl table = new utl.JsnTbl()
-                .setIncludeChildLists(includeChildLists)
                 .setListNameFilter(listNameFilterSet)
                 .setAttributeFilter(attributeFilterSet)
                 .create(JSON.deserializeUntyped(jsonString))
             ;
 
-
             // return the csv or the data and columns
             if(returnCsv){
-                return table.getCsvString();
+                return (returnConsole) ? table.getConsoleString() : table.getCsvString();
             }else{
                 return new Map<String,Object>{
                     'columns' => table.getColumnNames(),
@@ -53,7 +58,7 @@ public with sharing class JsonTableLwcCtrl {
                 };
             }
         }catch (Exception e) {
-            throw new AuraHandledException(e.getMessage() + e.getStackTraceString());
+            throw new AuraHandledException(e.getMessage());
         }
     }
 }

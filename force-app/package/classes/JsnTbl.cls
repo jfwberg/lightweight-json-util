@@ -1,14 +1,20 @@
 /**
- * @description A class representing a data table that can be used in LWC
+ * @author         Justus van den Berg (jfwberg@gmail.com)
+ * @date           May 2023
+ * @copyright      (c) 2023 Justus van den Berg
+ * @license        MIT (See LICENSE file in the project root)
+ * @description    Class that converts JSON to a data table that can be used in LWC or as a CSV
+ * @false-positive PMD.AvoidGlobalModifier This is a utility that is designed to be called from a
+ *                                         managed package. It can be used for a user's own custom
+ *                                         Implementation, so global is the way to open up this
+ *                                         utility for global use.
  */
-// performance test
-// apex docs
-// test classes
-// package
-
+@SuppressWarnings('PMD.AvoidGlobalModifier, PMD.OneDeclarationPerLine, PMD.ExcessiveParameterList, PMD.CognitiveComplexity, PMD.CyclomaticComplexity')
 global with sharing class JsnTbl {
    
- 
+    /** **************************************************************************************************** **
+     **                                          PRIVATE VARIABLES                                           **
+     ** **************************************************************************************************** **/
     // Values to be ignored when creating the data table
     private Set<String> attributeFilter = new Set<String>{};
 
@@ -36,16 +42,17 @@ global with sharing class JsnTbl {
     // The output containing the CSV data
     private List<String[]> csvData = new List<String[]>();
 
-    
 
     /** **************************************************************************************************** **
-     **                                         GLOBAL SETTER METHODS                                          **
+     **                                         GLOBAL SETTER METHODS                                        **
      ** **************************************************************************************************** **/
     /**
      * @description Method to enable the property filter
      *              Any properties that are part of this list will be ignored when generating
      *              the data table, so unused attributes are filtered out
-     *              i.e. new Set<String>{'attributes', 'totalSize' , 'done'} 
+     *              i.e. new Set<String>{'attributes', 'totalSize' , 'done'}
+     * @param  attributeFilter The set of values to filter
+     * @return      Self
      */
     global JsnTbl setAttributeFilter(Set<String> attributeFilter){
         this.attributeFilter = attributeFilter;
@@ -58,12 +65,13 @@ global with sharing class JsnTbl {
      *              Any list names like "records" will NOT be appended to to the column name
      *              this allows for flatter tables, but might result in some funky results
      *              i.e. new Set<String>{'attributes', 'totalSize' , 'done'} 
+     * @param  listNameFilter The set of values to filter
+     * @return      Self
      */
     global JsnTbl setListNameFilter(Set<String> listNameFilter){
         this.listNameFilter = listNameFilter;
         return this;
     }
-
 
     
     /** **************************************************************************************************** **
@@ -71,6 +79,8 @@ global with sharing class JsnTbl {
      ** **************************************************************************************************** **/
     /**
      * @description Create table from an untyped Object list
+     * @param input The object to create the table from (Untyped JSON maps)
+     * @return      Self
      */
     global JsnTbl create(Object input){
         
@@ -96,6 +106,8 @@ global with sharing class JsnTbl {
      * @description Method to set your custom column names
      *              This method should run after the create method, not that this takes
      *              will only override the output in the headers
+     * @param columnNames Set of column values to override the defaults with
+     * @return      Self
      */
     global JsnTbl updateColumnNames(Set<String> columnNames){
 
@@ -121,19 +133,30 @@ global with sharing class JsnTbl {
 
 
     /** **************************************************************************************************** **
-     **                                       GLOBAL GETTER METHODS                                         **
+     **                                       GLOBAL GETTER METHODS                                          **
      ** **************************************************************************************************** **/
+    /**
+     * @description Method to get the column names
+     * @return      A list of column names
+     */
     global String[] getColumnNames(){
         return new List<String>(this.columnNames);
     }
 
 
+    /**
+     * @description Method to get the column names and index location
+     * @return      A map with the column name and the corresponding index
+     */
     global Map<String,Integer> getColumnNameIndexMap(){
         return this.columnIndexMap;
     }
 
 
-
+    /**
+     * @description Method to get the table data as a LWC compatible key value format
+     * @return      A list of maps with the key value pairs
+     */
     global List<Map<String,Object>> getKeyValueData(){
         return this.keyValueData;
     }
@@ -141,6 +164,7 @@ global with sharing class JsnTbl {
 
     /**
      * @description Method to generate an indexed multi-dimentional array containing the data
+     * @return      A multi-dimentional array with the values
      */
     global List<Object[]> getIndexedData(){
         
@@ -154,6 +178,7 @@ global with sharing class JsnTbl {
 
     /**
      * @description Method to generate CSV data
+     * @return      A multi-dimentional with header row and CSV escaped string values
      */
     global List<String[]> getCsvData(){
         
@@ -165,6 +190,10 @@ global with sharing class JsnTbl {
     }
 
 
+    /**
+     * @description Method to generate a CSV string from the CSV data
+     * @return      A CSV string from the table
+     */
     global String getCsvString(){
         
         // Run creation logic
@@ -181,6 +210,11 @@ global with sharing class JsnTbl {
         return String.join(csvLines, '\n');
     }
 
+
+    /**
+     * @description Method to generate a user readable table that can be outputed to a console
+     * @return      A Console spaced table string from the table
+     */
     global String getConsoleString(){
 
         // Run creation logic for CSV
@@ -224,25 +258,23 @@ global with sharing class JsnTbl {
     }
 
 
-
-
-
-
-
     /** **************************************************************************************************** **
      **                                       PRIVATE SUPPORT METHODS                                        **
      ** **************************************************************************************************** **/
-    
-     private void initiateTable(){
+    /**
+     * @description Method to reset all table data
+     */
+    private void initiateTable(){
          // Reset data on when creatin the table
-         this.columnNames    = new Set<String>{};
-         this.columnIndexMap = new Map<String,Integer>();
-         this.keyValueData   = new List<Map<String,Object>>();
-         this.indexedData    = new List<Object[]>();
-         this.csvData        = new List<String[]>();
-     }
+        this.columnNames    = new Set<String>{};
+        this.columnIndexMap = new Map<String,Integer>();
+        this.keyValueData   = new List<Map<String,Object>>();
+        this.indexedData    = new List<Object[]>();
+        this.csvData        = new List<String[]>();
+    }
     
-     /**
+     
+    /**
      * @description Method to create a mapping between the column name and the index in the
      *              multi-dimentional array
      */
@@ -260,10 +292,10 @@ global with sharing class JsnTbl {
 
     /**
      * @description Method to Pre-populate all values in the indexedData array
-     * @param a
-     * @param a
-     * @param a
-     * @trows
+     * @param input          The array to index
+     * @param additionalRows Option to add additional rows to the index
+     * @param stringList     When true, the pre-population is done using string lists instead of
+     *                       object lists
      */
     private void createIndex(List<Object[]> input, Integer additionalRows, Boolean stringList){
 
@@ -281,6 +313,9 @@ global with sharing class JsnTbl {
     }
 
 
+    /**
+     * @description Method to create indexed data based on the key value data
+     */
     private void createIndexedData(){
         
         // Only run the logic if there is no data yet
@@ -299,6 +334,9 @@ global with sharing class JsnTbl {
     }
 
 
+    /**
+     * @description Method to create CSV data based on the key value data
+     */
     private void createCsvData(){
         
         // Only run the logic if there is no data yet
@@ -326,13 +364,14 @@ global with sharing class JsnTbl {
     }
 
 
-
     /** **************************************************************************************************** **
      **                                       PRIVATE TRAVERSE METHODS                                       **
      ** **************************************************************************************************** **/
     /**
      * @description Parent selector method, this method splits out how the top level record needs to be handled
      *              based on the type. This makes sure the least amount of type casting has to be done.
+     * @param input The input to traverse
+     * @param path  The location in the traverse path
      */
     private void traverseParent(Object input, String path){
         if(input instanceof Map<String,Object>){
@@ -345,6 +384,11 @@ global with sharing class JsnTbl {
     }
 
 
+    /**
+     * @description Traverse the parent map 
+     * @param input The input to traverse
+     * @param path  The location in the traverse path
+     */
     private void traverseParentMap(Map<String,Object> input, String path){
         for(String key : input.keySet()){		
 
@@ -363,6 +407,11 @@ global with sharing class JsnTbl {
     }
 
 
+    /**
+     * @description Traverse the parent list 
+     * @param input The input to traverse
+     * @param path  The location in the traverse path
+     */
     private void traverseParentList(Object[] input, String path){
 
         // Some values in the list do not have a key, in this cases we need to use the index
@@ -402,7 +451,9 @@ global with sharing class JsnTbl {
      * @description Method to handle a parent object like a Number, String or Boolean
      *              'true', ''"String"'', '123' are all valid JSON Strings, this method
      *              accomodates single value JSON just in case
-     */ 
+     * @param input The input to traverse
+     * @param path  The location in the traverse path
+     */
     private void traverseParentObject(Object input, String path){
         // Add the column name
         this.columnNames.add(String.valueOf(0));
@@ -419,6 +470,11 @@ global with sharing class JsnTbl {
     /**
      * @description Child selector method, this method splits out the wat a child record needs to be handled
      *              based on the type. This makes sure the least amount of type casting has to be done.
+     * @param input          The input to traverse
+     * @param path           The location in the traverse path
+     * @param row            The current row in the traverse path
+     * @param isObjectInlist Indicator if this is a single object value inside a list
+     * @param objectIndex    The location of the object in the list
      */
     private void traverseChild(Object input, String path, Map<String,Object> row, Boolean isObjectInlist, Integer objectIndex){
         if(input instanceof Object[]){
@@ -435,6 +491,14 @@ global with sharing class JsnTbl {
     }
 
 
+    /**
+     * @description Child Map traverse method
+     * @param input          The input to traverse
+     * @param path           The location in the traverse path
+     * @param row            The current row in the traverse path
+     * @param isObjectInlist Indicator if this is a single object value inside a list
+     * @param objectIndex    The location of the object in the list
+     */
     private void traverseChildMap(Map<String,Object> input, String path, Map<String,Object> row, Boolean isObjectInlist, Integer objectIndex){
         for(String key : input.keySet() ){
 
@@ -447,6 +511,14 @@ global with sharing class JsnTbl {
     }
 
 
+    /**
+     * @description Child List traverse method
+     * @param input          The input to traverse
+     * @param path           The location in the traverse path
+     * @param row            The current row in the traverse path
+     * @param isObjectInlist Indicator if this is a single object value inside a list
+     * @param objectIndex    The location of the object in the list
+     */
     private void traverseChildList(Object[] input, String path, Map<String,Object> row, Boolean isObjectInlist, Integer objectIndex){
             
         // Allow to filter out certain list names. Note that this can have some funky results
@@ -458,6 +530,14 @@ global with sharing class JsnTbl {
     }
 
 
+    /**
+     * @description Child Object traverse method
+     * @param input          The input to traverse
+     * @param path           The location in the traverse path
+     * @param row            The current row in the traverse path
+     * @param isObjectInlist Indicator if this is a single object value inside a list
+     * @param objectIndex    The location of the object in the list
+     */
     private void traverseChildObject(Object input, String path, Map<String,Object> row, Boolean isObjectInlist, Integer objectIndex){
         
         // Extract the path so it can be added in to the column names

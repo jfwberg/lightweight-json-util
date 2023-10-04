@@ -4,6 +4,7 @@ import TableResultModal from 'c/resultModal';
 import CsvResultModal   from 'c/csvResultModal';
 import createCsv        from '@salesforce/apex/JsonTableLwcCtrl.createCsv';
 import createTable      from '@salesforce/apex/JsonTableLwcCtrl.createTable';
+import createConsole    from '@salesforce/apex/JsonTableLwcCtrl.createConsole';
 
 export default class JsonTable extends LightningModal {
 	
@@ -19,9 +20,7 @@ export default class JsonTable extends LightningModal {
     // Configuration attributes for our data table creation
     jsonString       = "";
     attributeFilter  = "attributes, totalSize, done, nextRecordsUrl"
-    includeChildLists= true;
     listNameFilter   = "records";
-    startPath        = "";
 
 
     /** **************************************************************************************************** **
@@ -35,8 +34,6 @@ export default class JsonTable extends LightningModal {
             jsonString        : this.jsonString,
             attributeFilter   : this.attributeFilter,
             listNameFilter    : this.listNameFilter,
-            includeChildLists : this.includeChildLists,
-            path              : this.startPath,
             cacheBust         : this._cacheBust
         })
         .then(data => {
@@ -88,8 +85,6 @@ export default class JsonTable extends LightningModal {
             jsonString        : this.jsonString,
             attributeFilter   : this.attributeFilter,
             listNameFilter    : this.listNameFilter,
-            includeChildLists : this.includeChildLists,
-            path              : this.startPath,
             cacheBust         : this._cacheBust
         })
         .then(data => {
@@ -117,6 +112,45 @@ export default class JsonTable extends LightningModal {
         });
     }
 
+
+    handleClickCreateConsole() {
+		
+        this.loading =true;
+			
+        createConsole({ 
+            jsonString        : this.jsonString,
+            attributeFilter   : this.attributeFilter,
+            listNameFilter    : this.listNameFilter,
+            cacheBust         : this._cacheBust
+        })
+        .then(data => {
+            try{
+                // Open the modal
+                this.handleOpenCsvResultModal(data);
+
+            }catch(error){
+                LightningAlert.open({
+                    message: error.message,
+                    label: 'Error',
+                    theme : 'error'
+                });
+            }
+        })
+        .catch(error => {
+            LightningAlert.open({
+                message: error.body.message,
+                label: 'Error',
+                theme : 'error'
+            });
+        })
+        .finally(() => {
+            this.loading = false;
+        });
+    }
+
+
+
+    
 
     /** **************************************************************************************************** **
      **                                            MODAL METHODS                                             **
@@ -154,14 +188,5 @@ export default class JsonTable extends LightningModal {
 
     handleChangeListNameFilter(event){
         this.listNameFilter = event.target.value;
-    }
-
-
-    handleChangeIncludeChildLists(event){
-        this.includeChildLists = event.target.checked;
-    }
-
-    handleChangeStartPath(event){
-        this.startPath = event.target.value;
     }
 }

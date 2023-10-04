@@ -1,11 +1,3 @@
-/**
- * DATA    : 1000 Accounts with 10 Contacts each
- * TEST 01 : Fetching the result.records[].Contacts.records[].Owner.Profile.Name
- *           for 10k records and add them to an Object Maps
- * VARIANT : Verbose type casting with temporary variables
- * RESULT  : AVG CPU Time : 375 (100 tests)
- *           Heap Size    : 72
- */
 // Query configuration
 String  query  = 'SELECT Id, Name, Owner.Name, Owner.Profile.Name, ';
         query +='(SELECT AccountId, FirstName, LastName, Owner.Profile.Name FROM contacts LIMIT 10), ';

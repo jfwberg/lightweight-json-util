@@ -1,9 +1,3 @@
-/**
- * DATA    : 1000 Accounts with 10 Contacts and 10 Oppoertunities each each
- * TEST 01 : Check performance of creating a table with 21k rows from a JSON response
- * RESULT  : AVG CPU Time : 911
- *           Heap Size    : 1,610,406
- */
 // Query configuration
 String  query  = 'SELECT Id, Name, Owner.Name, Owner.Profile.Name, ';
         query +='(SELECT AccountId, FirstName, LastName, Owner.Profile.Name FROM contacts LIMIT 10), ';
