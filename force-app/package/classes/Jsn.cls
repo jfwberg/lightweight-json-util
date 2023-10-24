@@ -21,8 +21,8 @@ global with sharing class Jsn {
     /** **************************************************************************************************** **
      **                                          PRIVATE CONSTANTS                                           **
      ** **************************************************************************************************** **/
-    @TestVisible private static final String PATH_ERROR_MSG = 'The node "{0}" cannot be found.';
-
+    @TestVisible private static final String PATH_ERROR_MSG         = 'The node "{0}" cannot be found.';
+    
     
     /** **************************************************************************************************** **
      **                                       GLOBAL SETTER METHODS                                          **

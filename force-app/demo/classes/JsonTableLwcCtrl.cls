@@ -2,24 +2,24 @@
 public with sharing class JsonTableLwcCtrl {
 
     @AuraEnabled
-    public static Map<String,Object> createTable(String jsonString, String attributeFilter, String listNameFilter, String cacheBust){
-        return (Map<String,Object> ) createOutput(jsonString, attributeFilter, listNameFilter, false, false);  
+    public static Map<String,Object> createTable(String jsonString, Boolean numberColumn, String attributeFilter, String listNameFilter, String cacheBust){
+        return (Map<String,Object> ) createOutput(jsonString, numberColumn, attributeFilter, listNameFilter, false, false);  
     }
 
 
     @AuraEnabled
-    public static String createCsv(String jsonString, String attributeFilter, String listNameFilter, String cacheBust){
-       return (String ) createOutput(jsonString, attributeFilter, listNameFilter, true, false);  
+    public static String createCsv(String jsonString, Boolean numberColumn, String attributeFilter, String listNameFilter, String cacheBust){
+       return (String ) createOutput(jsonString, numberColumn, attributeFilter, listNameFilter, true, false);  
     }
 
 
     @AuraEnabled
-    public static String createConsole(String jsonString, String attributeFilter, String listNameFilter, String cacheBust){
-       return (String ) createOutput(jsonString, attributeFilter, listNameFilter, true, true);  
+    public static String createConsole(String jsonString, Boolean numberColumn, String attributeFilter, String listNameFilter, String cacheBust){
+       return (String ) createOutput(jsonString, numberColumn, attributeFilter, listNameFilter, true, true);  
     }
 
     
-    private static Object createOutput(String jsonString, String attributeFilter, String listNameFilter, Boolean returnCsv, Boolean returnConsole){
+    private static Object createOutput(String jsonString, Boolean numberColumn, String attributeFilter, String listNameFilter, Boolean returnCsv, Boolean returnConsole){
         try {
             // The filter sets
             Set<String> attributeFilterSet;
@@ -48,6 +48,16 @@ public with sharing class JsonTableLwcCtrl {
                 .create(JSON.deserializeUntyped(jsonString))
             ;
 
+            // Example of how to add data (or update data to a table)
+            // Can only be added at the end. But the idea is that the value can get sorted.
+            if(numberColumn){
+                Object[] columnData =  new Object[]{};
+                for(Integer i = 1, max=table.getKeyValueData().size(); i <= max; i++){
+                    columnData.add(i);
+                }
+                table.upsertColumnData('#', columnData, 0);
+            }
+
             // return the csv or the data and columns
             if(returnCsv){
                 return (returnConsole) ? table.getConsoleString() : table.getCsvString();
@@ -58,7 +68,7 @@ public with sharing class JsonTableLwcCtrl {
                 };
             }
         }catch (Exception e) {
-            throw new AuraHandledException(e.getMessage());
+            throw new AuraHandledException(e.getMessage() + e.getStackTraceString());
         }
     }
 }

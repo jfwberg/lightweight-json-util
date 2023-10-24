@@ -44,6 +44,13 @@ global with sharing class JsnTbl {
 
 
     /** **************************************************************************************************** **
+     **                                          PRIVATE CONSTANTS                                           **
+     ** **************************************************************************************************** **/
+    @TestVisible private static final String INVALID_VALUE_SIZE_MSG = 'The number of additional values cannot exceed the number of values in the table.';
+    @TestVisible private static final String INVALID_COLUMN_NAME_MSG= 'The column name cannot be blank.';
+
+
+    /** **************************************************************************************************** **
      **                                         GLOBAL SETTER METHODS                                        **
      ** **************************************************************************************************** **/
     /**
@@ -119,7 +126,7 @@ global with sharing class JsnTbl {
         // if the current list is greater than the new list
         if(oldNames.size() > newNames.size()){
             
-            // Pad the new column names with the left over names from existing columns
+            // Pad the new column names with the leftover names from existing columns
             for(Integer i=newNames.size(),max=oldNames.size();i<max;i++){
                 newNames.add(oldNames[i]);
             }  
@@ -128,6 +135,68 @@ global with sharing class JsnTbl {
         this.columnNames = new Set<String>(newNames);
 
         // Return self
+        return this;
+    }
+
+
+    /**
+     * @description Method to add your own custom columns or override an existing column value
+     *              This method should run after the create method.
+     *              Note that the order will need to match the column index. This is used to update
+     *              (external) Ids or to add numbering to the output.
+     * @param columnName   The name of the column
+     * @param columnValues The value for that specific column index.
+     * @return      Self
+     */
+    global JsnTbl upsertColumnData(String columnName, Object[] columnValues, Integer columnIndex){
+        
+        // Valiate we have a column name
+        if(String.isBlank(columnName) || columnValues == null || columnValues.isEmpty() ){
+            return this;
+        }
+        
+        // Add or update the value for the column.
+        for(Integer i = 0, max=((this.keyValueData.size() <= columnValues.size()) ? this.keyValueData.size() : columnValues.size()); i < max; i++){
+            this.keyValueData[i].put(columnName,columnValues[i]);
+        }
+
+        // Check if the column name already exists, if so there is no need to re-index
+        if(!this.columnNames.contains(columnName)){
+            
+            // If the column needs to be added at the end or no index is provided, simply add it on at the end
+            if(columnIndex == null || columnIndex >= this.columnNames.size()){
+                this.columnNames.add(columnName);
+            
+            // If the column needs to be added at the start, create a new list and add existing list
+            }else if(columnIndex <= 0){
+                Set<String> columnNames = new Set<String>{columnName};
+                columnNames.addAll(this.columnNames);
+                this.columnNames = columnNames;
+
+            // If the column needs to be added somewhere half way, add it in at the index point
+            }else{
+                // Temporary set of column names
+                Set<String> columnNames = new Set<String>();
+                Integer i=0;
+                
+                // Add in the new column name at the specified index
+                for(String currentColumnName : this.columnNames){
+                    if(i == columnIndex){
+                        columnNames.add(columnName);
+                    }
+                    columnNames.add(currentColumnName);
+                    i++;
+                }
+
+                // Update the column names in the table
+                this.columnNames = columnNames;
+            }
+
+            // Create the revised column index
+            this.createColumnIndexMap();
+        }
+
+        // return self
         return this;
     }
 
@@ -213,6 +282,7 @@ global with sharing class JsnTbl {
 
     /**
      * @description Method to generate a user readable table that can be outputed to a console
+     *              !! Very resource intensive and for testing purposes only !!
      * @return      A Console spaced table string from the table
      */
     global String getConsoleString(){

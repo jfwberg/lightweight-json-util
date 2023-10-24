@@ -32,6 +32,7 @@
         </div>
         
         <div class="slds-p-around_x-small">
+            
             <div class="slds-var-p-bottom_medium">
                 <div class="slds-form-element">
                     <div class="slds-form-element__control">
@@ -39,7 +40,17 @@
                     </div>
                 </div>
             </div>
-
+            
+            <div class="slds-var-p-bottom_medium">
+                <lightning-input 
+                  type="checkbox"
+                  label="Add number column?"
+                  name="numberColumn"
+                  checked={numberColumn}
+                  onchange={handleChangeNumberColumn}
+                ></lightning-input>
+            </div>
+            
             <div class="slds-var-p-bottom_medium">
                 <span class="slds-text-title">Child List Name Filter</span>
                 <span class="slds-var-p-around_small slds-size_large custom-helptext">

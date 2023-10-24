@@ -9,16 +9,40 @@
 @SuppressWarnings('PMD.ApexAssertionsShouldIncludeMessage')
 private with sharing class JsnTblTest {
 
-    
+    /** **************************************************************************************************** **
+     **                                          PRIVATE CONSTANTS                                           **
+     ** **************************************************************************************************** **/
+    // Permission set to test with
+    private static final String PERMISSION_SET_NAME = 'Lightweight_JSON_Util';
+
+    // Create a test user
+    private static final User TST_USER = utl.Tst.createRunAsUser(
+        utl.Tst.MINIMUM_ACCESS_PROFILE,
+        PERMISSION_SET_NAME
+    );
+
+
+    /** **************************************************************************************************** **
+     **                                            TEST METHODS                                              **
+     ** **************************************************************************************************** **/
     @IsTest
     static void testDataTableWithNestedLists(){
         
-        JsnTbl table = new JsnTbl()
-            .setAttributeFilter(new Set<String>{'ignore'})
-            .setListNameFilter(new Set<String>{'records'})
-            .create(JSON.deserializeUntyped('[[1,2,3],[1,2,3],[1,2,3],{"keyVal" : "b", "ignore": "ignore", "records" : ["rec1","rec2"]}]'))
-            .updateColumnNames(new Set<String>{'Column A', 'Column B', 'Column C'})
-        ;
+        // Table to assert against
+        JsnTbl table;
+
+        // Start the test
+        Test.startTest();
+        System.runAs(TST_USER){
+
+            table = new JsnTbl()
+                .setAttributeFilter(new Set<String>{'ignore'})
+                .setListNameFilter(new Set<String>{'records'})
+                .create(JSON.deserializeUntyped('[[1,2,3],[1,2,3],[1,2,3],{"keyVal" : "b", "ignore": "ignore", "records" : ["rec1","rec2"]}]'))
+                .updateColumnNames(new Set<String>{'Column A', 'Column B', 'Column C'})
+            ;
+        }
+        Test.stopTest();
 
         // There should be 4 columns
         Assert.areEqual(4,  table.getColumnNames().size());
@@ -56,9 +80,18 @@ private with sharing class JsnTblTest {
     @IsTest
     static void testDataTableWithNestedObjects(){
         
-        JsnTbl table = new JsnTbl()
-            .create(JSON.deserializeUntyped('{"obj1" : {"a" : 1, "b" : 2}, "obj2" : {"y" : 25, "z" : 26, "e" : {"f" : 6} }, "obj3" : [{"k1":"v1"},{"k2":"v2"},{"k3":"v3"},[1,2,3]]}'))
-        ;
+        // Table to assert against
+        JsnTbl table;
+
+        // Start the test
+        Test.startTest();
+        System.runAs(TST_USER){
+
+            table = new JsnTbl()
+                .create(JSON.deserializeUntyped('{"obj1" : {"a" : 1, "b" : 2}, "obj2" : {"y" : 25, "z" : 26, "e" : {"f" : 6} }, "obj3" : [{"k1":"v1"},{"k2":"v2"},{"k3":"v3"},[1,2,3]]}'))
+            ;
+        }
+        Test.stopTest();
 
         // There should be 11 columns
         Assert.areEqual(11,  table.getColumnNames().size());
@@ -72,9 +105,17 @@ private with sharing class JsnTblTest {
     @IsTest
     static void testDataTableWithSingleParentObject(){
         
-        JsnTbl table = new JsnTbl()
-            .create(JSON.deserializeUntyped('19'))
-        ;
+        // Table to assert against
+        JsnTbl table;
+
+        // Start the test
+        Test.startTest();
+        System.runAs(TST_USER){
+            table = new JsnTbl()
+                .create(JSON.deserializeUntyped('19'))
+            ;
+        }
+        Test.stopTest();
 
         // There should be 1 columns
         Assert.areEqual(1,  table.getColumnNames().size());
@@ -85,5 +126,43 @@ private with sharing class JsnTblTest {
         
         // There should be 3 custom headers and 1 standard
         Assert.areEqual('0', table.getColumnNames()[0]);
+    }
+
+
+    @IsTest
+    static void testAddColumn(){
+        
+        // Table to assert against
+        JsnTbl table;
+
+        // Start the test
+        Test.startTest();
+        System.runAs(TST_USER){
+
+            table = new JsnTbl()
+                .create(JSON.deserializeUntyped('["a","b","c"]'))
+                .upsertColumnData('start',new Object[]{1},0)
+                .upsertColumnData('middle',new Object[]{1},2)
+                .upsertColumnData('end',new Object[]{1},null)
+                .upsertColumnData(null,new Object[]{1},10)
+                .upsertColumnData('null',null,10)
+            ;
+        }
+        Test.stopTest();
+
+        // There should be 1 columns
+        Assert.areEqual(6,  table.getColumnNames().size());
+        Assert.areEqual(6,  table.getColumnNameIndexMap().size());
+
+        // There should 1 rows of data
+        Assert.areEqual(1, table.getKeyValueData().size());
+
+        // Check everything is where it should be
+        Assert.areEqual(0, table.getColumnNameIndexMap().get('start'));
+        Assert.areEqual(1, table.getColumnNameIndexMap().get('0'));
+        Assert.areEqual(2, table.getColumnNameIndexMap().get('middle'));
+        Assert.areEqual(3, table.getColumnNameIndexMap().get('1'));
+        Assert.areEqual(4, table.getColumnNameIndexMap().get('2'));
+        Assert.areEqual(5, table.getColumnNameIndexMap().get('end'));
     }
 }

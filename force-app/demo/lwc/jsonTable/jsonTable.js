@@ -19,6 +19,7 @@ export default class JsonTable extends LightningModal {
 
     // Configuration attributes for our data table creation
     jsonString       = "";
+    numberColumn     = true;
     attributeFilter  = "attributes, totalSize, done, nextRecordsUrl"
     listNameFilter   = "records";
 
@@ -32,6 +33,7 @@ export default class JsonTable extends LightningModal {
 			
         createTable({ 
             jsonString        : this.jsonString,
+            numberColumn      : this.numberColumn,
             attributeFilter   : this.attributeFilter,
             listNameFilter    : this.listNameFilter,
             cacheBust         : this._cacheBust
@@ -83,6 +85,7 @@ export default class JsonTable extends LightningModal {
 			
         createCsv({ 
             jsonString        : this.jsonString,
+            numberColumn      : this.numberColumn,
             attributeFilter   : this.attributeFilter,
             listNameFilter    : this.listNameFilter,
             cacheBust         : this._cacheBust
@@ -119,6 +122,7 @@ export default class JsonTable extends LightningModal {
 			
         createConsole({ 
             jsonString        : this.jsonString,
+            numberColumn      : this.numberColumn,
             attributeFilter   : this.attributeFilter,
             listNameFilter    : this.listNameFilter,
             cacheBust         : this._cacheBust
@@ -180,6 +184,9 @@ export default class JsonTable extends LightningModal {
         this.jsonString = event.target.value;
     }
 
+    handleChangeNumberColumn(event){
+        this.numberColumn = event.target.checked;
+    }
 
     handleChangeAttributeFilter(event){
         this.attributeFilter = event.target.value;

@@ -3,6 +3,13 @@ A lightweight Apex utility that allows for easy getting the nested data of an un
 The JSON Table Utility transforms nested key/value data structures into a flat data table structure that can be used in Apex, FLows, LWCs or Visualforce.
 It handles multiple data output formats including CSV and is optimised for the use of Salesforce REST Query API Responses.
 
+## Dependency info
+
+
+## Package Info
+
+
+
 ## Methods to fetch Objects, Object Maps and Object Lists from an untyped Object Map
 If you have a complex data structure and have used ```JSON.deserializeUntyped()``` you can get a complex set of deeply nested untyped object values, lists and data structures.
 To simplify getting a specific data from a number levels deep this utility's ```Jsn``` class contains methods that can be leveraged to make this process easier, less verbose and more readable.
@@ -116,11 +123,11 @@ Once you have setup your class you're now ready to create the data content with 
 |--------|-------------|
 | ```create(Object)```                 | Create your table from an Object List, this will usually be ```JSON.deserializeUntyped(jsonString)```. But you can typecast the response as well|
 | ```updateColumnNames(Set<String>)``` | This needs to run after the create method. It allows you to set your own column names. These need to be in order of the map.|
-
-
+| ```upsertColumnData(String columnName, Object[] columnValues, Integer columnIndex)``` | This needs to run after the create method. It allows you to add a column or update a columm. This can be useful to add a number column or an UUID column or override an random id number or timestamp. It can also be handy if you need to add any static column data for system updates. |
 
 ### Use
 Once your table is created you can now extract the data using one of the following methods
+
 | Method | Data Type |Description|
 |--------|-------------|----|
 | ```getKeyValueData()```      | ```List<Map<String,Object>>``` |Get a key/value pair data structure|
@@ -239,6 +246,17 @@ utl.JsnTbl table = new utl.JsnTbl()
     .create(JSON.deserializeUntyped(callout.getResponse().getBody()))
 	.updateColumnNames(new Set<String>{'Id','Name','Number','Account Type Id','Billing Address Id','Created Date','Data Source Id','Data Source Object'})
 ;
+
+// Creeate a number list
+// Note: Try to always do this on the key value data. This data gets always created
+// Indexed data and CSV data are only created once the method is called)
+Object[] columnData =  new Object[]{};
+for(Integer i = 1, max=table.getKeyValueData().size(); i <= max; i++){
+    columnData.add(i);
+}
+
+// Add the number list at the start of the table
+table.upsertColumnData('#', columnData, 0);
 
 // Data table output in the console
 System.debug(table.getConsoleString());
