@@ -46,8 +46,9 @@ global with sharing class JsnTbl {
     /** **************************************************************************************************** **
      **                                          PRIVATE CONSTANTS                                           **
      ** **************************************************************************************************** **/
-    @TestVisible private static final String INVALID_VALUE_SIZE_MSG = 'The number of additional values cannot exceed the number of values in the table.';
-    @TestVisible private static final String INVALID_COLUMN_NAME_MSG= 'The column name cannot be blank.';
+    @TestVisible private static final String INVALID_VALUE_SIZE_MSG    = 'The number of additional values cannot exceed the number of values in the table.';
+    @TestVisible private static final String INVALID_COLUMN_NAME_MSG   = 'The column name cannot be blank.';
+    @TestVisible private static final String INVALID_CONCAT_COLUMN_MSG = 'The column name "{0}" does not exist and cannot be concatenated';
 
 
     /** **************************************************************************************************** **
@@ -82,7 +83,7 @@ global with sharing class JsnTbl {
 
     
     /** **************************************************************************************************** **
-     **                                       GLOBAL SUPPORT METHODS                                         **
+     **                                   GLOBAL CREATE SUPPORT METHODS                                      **
      ** **************************************************************************************************** **/
     /**
      * @description Create table from an untyped Object list
@@ -109,36 +110,62 @@ global with sharing class JsnTbl {
     }
 
 
-    /**
-     * @description Method to set your custom column names
-     *              This method should run after the create method, not that this takes
-     *              will only override the output in the headers
-     * @param columnNames Set of column values to override the defaults with
-     * @return      Self
-     */
-    global JsnTbl updateColumnNames(Set<String> columnNames){
 
-        // Get the current column names
-        String[] oldNames = this.getColumnNames();
-        String[] newNames = new List<String>(columnNames);
+    private void validateColumnNames( Set<String> columnNames){
 
-        // To prevent the list going out of bounds we need to create a combined list
-        // if the current list is greater than the new list
-        if(oldNames.size() > newNames.size()){
-            
-            // Pad the new column names with the leftover names from existing columns
-            for(Integer i=newNames.size(),max=oldNames.size();i<max;i++){
-                newNames.add(oldNames[i]);
-            }  
+        // Input validation on the input set
+        if(columnNames == null || columnNames.isEmpty()){
+            throw new Jsn.JsonUtilException('The set of Column names cannot be empty');
         }
-        // Update the column names
-        this.columnNames = new Set<String>(newNames);
 
-        // Return self
+        // Input validation for the column names
+        for(String columnName : columnNames){
+            if(!this.columnNames.contains(columnName)){
+                throw new Jsn.JsonUtilException(String.format(
+                    INVALID_CONCAT_COLUMN_MSG, new String[]{columnName})
+                );
+            }
+        }
+
+    }
+
+    /**
+     * @description Sometimes not each key/value pair exists for each record.
+     *              This can lead to issues when updating values. Use this method to add
+     *              the missing key/value pair to records that do not have them.
+     * @param columnNames The names of columns that will be added as a key item for records
+     *                    that do not have the specific key
+     * @return self
+     */
+    global JsnTbl fillColumnsWithNullValue(Set<String> columnNames){
+
+        // Validate the input
+        validateColumnNames(columnNames);
+
+        // Convert to string list for faster iterations later.
+        // Seems overkill but integer loops are significantly faster when we're talking about 1000+ rows
+        String[] columnNameList = new List<String>(columnNames);
+        Integer numberOfColumns = columnNames.size();
+
+        // Iterate each record in the row
+        for(Integer i = 0, max=this.keyValueData.size(); i < max; i++){
+            
+            // If the record does not contain a certain key, add a null value
+            for(Integer j = 0; j < numberOfColumns; j++){
+                if(!this.keyValueData[i].containsKey(columnNameList[j])){
+                    this.keyValueData[i].put(columnNameList[j],null);
+                }
+            }
+        }
+
+        // return self
         return this;
     }
 
 
+    /** **************************************************************************************************** **
+     **                                  GLOBAL MANIPULATE SUPPORT METHODS                                   **
+     ** **************************************************************************************************** **/
     /**
      * @description Method to add your own custom columns or override an existing column value
      *              This method should run after the create method.
@@ -200,6 +227,158 @@ global with sharing class JsnTbl {
         return this;
     }
 
+
+    /**
+     * @description Method to add a column that is the concatenated value of 2 other columns
+     *              This is used to create combined keys.
+     * @param columnNames       The names of the columns to concatenate
+     * @param glue              The separator string that glues the column values together
+     * @param outputColumnName  The name of the new column
+     * @param outputColumnIndex The index of where in the file this column is added
+     * @return      Self
+     */
+    global JsnTbl concatColumnData(Set<String> columnNames, String glue, String outputColumnName, Integer outputColumnIndex){
+
+        // Validate the input
+        this.validateColumnNames(columnNames);
+
+        // Convert to string list for faster iterations later.
+        // Seems overkill but integer loops are significantly faster when we're talking about 1000+ rows
+        String[] columnNameList = new List<String>(columnNames);
+        Integer numberOfColumns = columnNames.size();
+
+        // List to hold our output
+        Object[] columnValues = new Object[]{};
+
+        // Iterate each record in the row
+        for(Integer i = 0, max=this.keyValueData.size(); i < max; i++){
+            
+            // Temporary String
+            String[] concatData = new String[]{};
+            
+            // Add each concat value to the list
+            for(Integer j = 0; j < numberOfColumns; j++){
+                if(this.keyValueData[i].get(columnNameList[j]) != null){
+                    concatData.add(String.valueOf(this.keyValueData[i].get(columnNameList[j])));
+                }
+            }
+            // Add the glued value to the column values
+            columnValues.add(String.join(concatData, glue));
+        }
+
+        // Use the upsert logic to add the column
+        return upsertColumnData( outputColumnName, columnValues, outputColumnIndex);
+    }
+
+
+    /**
+     * @description Method to remove columns from the data table
+     * @param  columnNames The names of columns that will be deleted
+     * @return self
+     */
+    global JsnTbl deleteColumns(Set<String> columnNames){
+
+        // Validate the input
+        this.validateColumnNames(columnNames);
+
+        // Convert to string list for faster iterations later.
+        // Seems overkill but integer loops are significantly faster when we're talking about 1000+ rows
+        String[] columnNameList = new List<String>(columnNames);
+        Integer numberOfColumns = columnNames.size();
+
+        // Remove the column key from the data map
+        for(Integer i = 0, max=this.keyValueData.size(); i < max; i++){
+            for(Integer j = 0; j < numberOfColumns; j++){
+                this.keyValueData[i].remove(columnNameList[j]);
+            }
+        }
+
+        // Remove the columns from the columns list
+        for(Integer j = 0; j < numberOfColumns; j++){
+            this.columnNames.remove(columnNameList[j]);
+        }
+
+        // Create the revised column index
+        this.createColumnIndexMap();
+
+        // return self
+        return this;
+    }
+
+
+    /** **************************************************************************************************** **
+     **                                   GLOBAL HEADER SUPPORT METHODS                                      **
+     ** **************************************************************************************************** **/
+    /**
+     * @description Method to set your custom column names
+     *              This method should run after the create method, note that this method
+     *              will only override the output headers.
+     *              Use this method if you have an ordered list of header names
+     *              Like in a Data Cloud Query response with a multi dimentional array.
+     * @param columnNames Set of column values to override the defaults with
+     * @return      Self
+     */
+    global JsnTbl updateColumnNames(Set<String> columnNames){
+
+        // Input validation on the input set
+        if(columnNames == null || columnNames.isEmpty()){
+            return this;
+        }
+
+        // Get the current column names
+        String[] oldNames = this.getColumnNames();
+        String[] newNames = new List<String>(columnNames);
+
+        // To prevent the list going out of bounds we need to create a combined list
+        // if the current list is greater than the new list
+        if(oldNames.size() > newNames.size()){
+            
+            // Pad the new column names with the leftover names from existing columns
+            for(Integer i=newNames.size(),max=oldNames.size();i<max;i++){
+                newNames.add(oldNames[i]);
+            }  
+        }
+        // Update the column names
+        this.columnNames = new Set<String>(newNames);
+
+        // Return self
+        return this;
+    }
+
+
+    /**
+     * @description Method to set your custom column names
+     *              This method should run after the create method, note that this method
+     *              will only override the output headers.
+     *              Use this to override specific field names only or if you have a mapping
+     *              between like a source and target system CSV file
+     * @param oldNameNewNameMap Map that contains the old name and the new name
+     * @return      Self
+     */
+    global JsnTbl updateColumnNames(Map<String,String> oldNameNewNameMap){
+        
+        // Input validation on the conversion map
+        if(oldNameNewNameMap == null || oldNameNewNameMap.isEmpty()){
+            return this;
+        }
+
+        // Get the current column names
+        String[] oldNames = this.getColumnNames();
+        String[] newNames = new String[]{};
+ 
+        // Iterate the existing columns and override if the mapping contains the matching value
+        for(Integer i=0,max=oldNames.size();i<max;i++){
+            newNames.add((oldNameNewNameMap.containsKey(oldNames[i])) ? oldNameNewNameMap.get(oldNames[i]) : oldNames[i]);
+        }  
+        
+        // Update the column names
+        this.columnNames = new Set<String>(newNames);
+
+        // Return self 
+        return this;
+    }
+
+    
 
     /** **************************************************************************************************** **
      **                                       GLOBAL GETTER METHODS                                          **
@@ -408,7 +587,7 @@ global with sharing class JsnTbl {
      * @description Method to create CSV data based on the key value data
      */
     private void createCsvData(){
-        
+
         // Only run the logic if there is no data yet
         if(this.csvData.isEmpty()){
             

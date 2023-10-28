@@ -1,7 +1,7 @@
 // Query configuration
 String  query  = 'SELECT Id, Name, Owner.Name, Owner.Profile.Name, ';
-        query +='(SELECT AccountId, FirstName, LastName, Owner.Profile.Name FROM contacts LIMIT 10), ';
-        query +='(SELECT AccountId, Name, StageName, CloseDate, Owner.Profile.Name FROM opportunities LIMIT 10) ';
+        query +='(SELECT Id, AccountId, FirstName, LastName, Owner.Profile.Name FROM contacts LIMIT 10), ';
+        query +='(SELECT Id, AccountId, Name, StageName, CloseDate, Owner.Profile.Name FROM opportunities LIMIT 10) ';
         query +='FROM Account WHERE Name LIKE \'Demo Account - %\' ORDER BY Name ASC LIMIT 10';
 
 Boolean isTooling         = false;
@@ -10,14 +10,30 @@ String  jsonString        = getQueryResponseBody(query, isTooling);
 try{
     // Create a data table from a Salesforce API query response
     utl.JsnTbl table = new utl.JsnTbl()
-        .setAttributeFilter(new Set<String>{'attributes', 'done'})
-        .createFromObjectList((Object[]) ((Map<String,Object>)JSON.deserializeUntyped(jsonString)).get('records'))
+        // Run before create
+		.setAttributeFilter(new Set<String>{'attributes', 'done'})
+		.setListNameFilter(new Set<String>{'records'})
+		
+		// Create the table
+        .create((Object[]) ((Map<String,Object>)JSON.deserializeUntyped(jsonString)).get('records'))
+		.fillColumnsWithNullValue(new Set<String>{'Name'})
+		
+		// Make sure these run after the create method
+		.concatColumnData(new Set<String>{'Contacts.AccountId','Contacts.Id'}, '_', 'ACC_CON_CONCAT_ID', 1)
+		.concatColumnData(new Set<String>{'Contacts.FirstName','Contacts.LastName'}, ' ', 'CONTACT_FULL_NAME', 2)
+		.deleteColumns(new Set<String>{'Id','Contacts.AccountId','Contacts.Id'})
+		
+		// Make sure this method is run last to prevent null pointer exceptions
+		.updateColumnNames(new Map<String,String>{
+			'Name' => 'Account Name',
+			'Contacts.totalSize' => 'Number_of_Contacts'
+		})
+		
     ;   
 
     // Output the result as a csv
-    System.debug(table.getCsvString());
+    System.debug(table.getConsoleString());
     
-
 }catch(Exception e){
     
     // Handle JSON related exceptions
@@ -30,7 +46,7 @@ try{
     
     // Handle Unknown Exceptions
     }else {
-        System.debug('Unknown Exeption: '       + e.getMessage());
+        System.debug('Unknown Exeption: '       + e.getMessage() + e.getStackTraceString());
     }
 }
 

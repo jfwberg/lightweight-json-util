@@ -117,13 +117,27 @@ A JSON Data table is configured using a number of methods to override the defaul
 | ```setAttributeFilter(Set<String>)``` | This allows you to specify attributes names you want to filter out. For example if you work with Salesforce REST API Query results, you might want to filter out the attributes and query result details for display purposes and only show the data attributes. You can do that using a filter like:  ```new Set<String>{'attributes', 'totalSize', 'done'}``` |null|
 
 ### Create
-Once you have setup your class you're now ready to create the data content with the configuration
+Once you have setup your class you're now ready to create the data content with the configuration.
+Optionally you can fill your columns with null values. 
 
 | Method | Description |
 |--------|-------------|
-| ```create(Object)```                 | Create your table from an Object List, this will usually be ```JSON.deserializeUntyped(jsonString)```. But you can typecast the response as well|
-| ```updateColumnNames(Set<String>)``` | This needs to run after the create method. It allows you to set your own column names. These need to be in order of the map.|
+| ```create(Object)``` | Create your table from an Object List, this will usually be ```JSON.deserializeUntyped(jsonString)```. But you can typecast the response as well|
+| ```fillColumnsWithNullValue(Set<String> columnNames)``` | This creates a key for each record where that key does not exist and is required when concatenating column data in the manipulate section
+
+
+### Manipulate
+Once you have created your table and you can now add new static columns or remove columns you don't need
 | ```upsertColumnData(String columnName, Object[] columnValues, Integer columnIndex)``` | This needs to run after the create method. It allows you to add a column or update a columm. This can be useful to add a number column or an UUID column or override an random id number or timestamp. It can also be handy if you need to add any static column data for system updates. |
+| ```concatColumnData(Set<String> columnNames, String glue, String outputColumnName,  Integer outputColumnIndex)``` | This method concates the data multiple columns and puts them in a new column. This is useful to generate combined keys. Its uses the above method but has a pre-built most used method.|
+| ```deleteColums(Set<String> columnNames``` | This method allows you to remove columns you don't need from the table |
+
+### Update headers
+Once you have created your table and you are done adding or removing columns you have to options to rename the headers of your columns. Always run this method last to prevent null pointer exceptions
+
+| Method | Description |
+| ```updateColumnNames(Set<String>)```        | This needs to run after the create methods. It allows you to set your own column names. These need to be in order of the data. This is especially useful when you have a Data Cloud Query response.|
+| ```updateColumnNames(Map<String,String>)``` | This needs to run after the create methods. It allows you to set your own column names. This can be any number of values as long as the source column name has a matching target name. This is really useful when you need to convert CSV headers to a target system.|
 
 ### Use
 Once your table is created you can now extract the data using one of the following methods
@@ -134,7 +148,7 @@ Once your table is created you can now extract the data using one of the followi
 | ```getIndexedData()```       | ```List<Object[]>```           |Get a multi-dimentional array data structure|
 | ```getCsvData()```           | ```List<String[]>```           |Get a multi-dimentional array with header row and csv encoded values|
 | ```getCsvString()```         | ```String```                   |Get a CSV formatted String|
-| ```getConsoleString()```     | ```String```                   |Get a human readable formatted table with equally spaced out columns based on the largest value |
+| ```getConsoleString()```     | ```String```                   |Get a human readable formatted table with equally spaced out columns based on the largest value (Testing only and resource intensive, not for large tables and expect CPU or heap size issues)|
 | ```getColumnNames()```       | ```String[]```                 |Get a list of column names in the order of the JSON input|
 | ```getColumnNameIndexMap()```| ```Map<String,Integer>```      |Get a mapping between the column header name and the location of the column|
 

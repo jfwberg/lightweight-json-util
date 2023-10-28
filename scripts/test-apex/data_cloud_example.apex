@@ -3,10 +3,10 @@
  */
 // Query callout to named credential with error handling
 utl.Rst callout = new utl.Rst('DC_ORG_01', true)
-	.setHandleSfEndpoint(false)
+    .setHandleSfEndpoint(false)
     .setEndpoint('/api/v2/query')
     .setMethod('POST')
-	.setBody('{"sql" : "SELECT ssot__Id__c, ssot__Name__c, ssot__Number__c, ssot__AccountTypeId__c, ssot__BillContactAddressId__c, ssot__CreatedDate__c, ssot__DataSourceId__c, ssot__DataSourceObjectId__c FROM ssot__Account__dlm LIMIT 100"}')
+    .setBody('{"sql" : "SELECT ssot__Id__c, ssot__Name__c, ssot__Number__c, ssot__AccountTypeId__c, ssot__BillContactAddressId__c, ssot__CreatedDate__c, ssot__DataSourceId__c, ssot__DataSourceObjectId__c FROM ssot__Account__dlm LIMIT 100"}')
     .call()
 ;
 
