@@ -1,44 +1,46 @@
 {
-    "packageDirectories": [
+  "packageDirectories": [
+    {
+      "path": "force-app/package",
+      "default": true,
+      "package": "Lightweight - JSON Util",
+      "versionName": "v59.0 - 0.3",
+      "versionNumber": "0.3.0.NEXT",
+      "versionDescription": "A lightweight Apex utility for path based traversing of untyped Object Maps and converting JSON to a flat Data Table or CSV format",
+      "ancestorVersion": "0.2.0",
+      "dependencies": [
         {
-            "path": "force-app/package",
-            "default": true,
-            "package": "Lightweight - JSON Util",
-            "versionName": "v59.0 - 0.2",
-            "versionNumber": "0.2.0.NEXT",
-            "versionDescription": "A lightweight Apex utility for path based traversing of untyped Object Maps and converting JSON to a flat Data Table or CSV format",
-            "ancestorVersion": "0.1.0",
-            "dependencies": [
-                {
-                    "package": "Lightweight - Apex Unit Test Util v2@2.3.0-1"
-                }
-            ]
-        },
-        {
-            "path": "force-app/package",
-            "default": false,
-            "package": "Lightweight - JSON Util (Unlocked)",
-            "versionName": "v59.0 - 0.2",
-            "versionNumber": "0.2.0.NEXT",
-            "versionDescription": "A lightweight Apex utility for path based traversing of untyped Object Maps and converting JSON to a flat Data Table or CSV format",
-            "dependencies": [
-                {
-                    "package": "Lightweight - Apex Unit Test Util v2 (Unlocked)@2.3.0-1"
-                }
-            ]
+          "package": "Lightweight - Apex Unit Test Util v2@2.3.0-1"
         }
-    ],
-    "name": "lightweight-json-util",
-    "namespace": "utl",
-    "sfdcLoginUrl": "https://login.salesforce.com",
-    "sourceApiVersion": "59.0",
-    "packageAliases": {
-        "Lightweight - Apex Unit Test Util v2@2.3.0-1": "04tP30000007oePIAQ",
-        "Lightweight - Apex Unit Test Util v2 (Unlocked)@2.3.0-1": "04tP30000007og1IAA",
-        "Lightweight - JSON Util": "0HoP3000000006TKAQ",
-        "Lightweight - JSON Util@0.1.0-1": "04tP30000005PYrIAM",
-        "Lightweight - JSON Util@0.2.0-1": "04tP30000007y99IAA",
-        "Lightweight - JSON Util (Unlocked)": "0HoP3000000009hKAA",
-        "Lightweight - JSON Util (Unlocked)@0.2.0-1": "04tP30000007yfNIAQ"
+      ]
+    },
+    {
+      "path": "force-app/package",
+      "default": false,
+      "package": "Lightweight - JSON Util (Unlocked)",
+      "versionName": "v59.0 - 0.3",
+      "versionNumber": "0.3.0.NEXT",
+      "versionDescription": "A lightweight Apex utility for path based traversing of untyped Object Maps and converting JSON to a flat Data Table or CSV format",
+      "dependencies": [
+        {
+          "package": "Lightweight - Apex Unit Test Util v2 (Unlocked)@2.3.0-1"
+        }
+      ]
     }
+  ],
+  "name": "lightweight-json-util",
+  "namespace": "utl",
+  "sfdcLoginUrl": "https://login.salesforce.com",
+  "sourceApiVersion": "59.0",
+  "packageAliases": {
+    "Lightweight - Apex Unit Test Util v2@2.3.0-1": "04tP30000007oePIAQ",
+    "Lightweight - Apex Unit Test Util v2 (Unlocked)@2.3.0-1": "04tP30000007og1IAA",
+    "Lightweight - JSON Util": "0HoP3000000006TKAQ",
+    "Lightweight - JSON Util@0.1.0-1": "04tP30000005PYrIAM",
+    "Lightweight - JSON Util@0.2.0-1": "04tP30000007y99IAA",
+    "Lightweight - JSON Util (Unlocked)": "0HoP3000000009hKAA",
+    "Lightweight - JSON Util (Unlocked)@0.2.0-1": "04tP30000007yfNIAQ",
+    "Lightweight - JSON Util@0.3.0-1": "04tP30000008XejIAE",
+    "Lightweight - JSON Util (Unlocked)@0.3.0-1": "04tP30000008XgLIAU"
+  }
 }

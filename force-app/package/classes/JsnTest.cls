@@ -1,3 +1,10 @@
+/**
+ * @author         Justus van den Berg (jfwberg@gmail.com)
+ * @date           May 2023
+ * @copyright      (c) 2023 Justus van den Berg
+ * @license        MIT (See LICENSE file in the project root)
+ * @description    Test Class for the Jsn class
+ */
 @IsTest
 private with sharing class JsnTest {
 

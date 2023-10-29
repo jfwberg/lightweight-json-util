@@ -48,8 +48,10 @@ global with sharing class JsnTbl {
      ** **************************************************************************************************** **/
     @TestVisible private static final String INVALID_VALUE_SIZE_MSG    = 'The number of additional values cannot exceed the number of values in the table.';
     @TestVisible private static final String INVALID_COLUMN_NAME_MSG   = 'The column name cannot be blank.';
-    @TestVisible private static final String INVALID_CONCAT_COLUMN_MSG = 'The column name "{0}" does not exist and cannot be concatenated';
+    @TestVisible private static final String COLUMN_DOES_NOT_EXIST_MSG = 'The column name "{0}" does not exist.';
+    @TestVisible private static final String EMPTY_COLUMNS_MSG         = 'The set of Column names cannot be empty.';
 
+    
 
     /** **************************************************************************************************** **
      **                                         GLOBAL SETTER METHODS                                        **
@@ -109,25 +111,6 @@ global with sharing class JsnTbl {
         return this;
     }
 
-
-
-    private void validateColumnNames( Set<String> columnNames){
-
-        // Input validation on the input set
-        if(columnNames == null || columnNames.isEmpty()){
-            throw new Jsn.JsonUtilException('The set of Column names cannot be empty');
-        }
-
-        // Input validation for the column names
-        for(String columnName : columnNames){
-            if(!this.columnNames.contains(columnName)){
-                throw new Jsn.JsonUtilException(String.format(
-                    INVALID_CONCAT_COLUMN_MSG, new String[]{columnName})
-                );
-            }
-        }
-
-    }
 
     /**
      * @description Sometimes not each key/value pair exists for each record.
@@ -315,6 +298,8 @@ global with sharing class JsnTbl {
      *              will only override the output headers.
      *              Use this method if you have an ordered list of header names
      *              Like in a Data Cloud Query response with a multi dimentional array.
+     * @note        Do NOT rebuild the index, the record keys are not updated, only the output column names change
+     *              the internal naming should not be updated, for performance reasons.
      * @param columnNames Set of column values to override the defaults with
      * @return      Self
      */
@@ -353,6 +338,8 @@ global with sharing class JsnTbl {
      *              Use this to override specific field names only or if you have a mapping
      *              between like a source and target system CSV file
      * @param oldNameNewNameMap Map that contains the old name and the new name
+     * @note        Do NOT rebuild the index, the record keys are not updated, only the output column names change
+     *              the internal naming should not be updated, for performance reasons.
      * @return      Self
      */
     global JsnTbl updateColumnNames(Map<String,String> oldNameNewNameMap){
@@ -365,7 +352,7 @@ global with sharing class JsnTbl {
         // Get the current column names
         String[] oldNames = this.getColumnNames();
         String[] newNames = new String[]{};
- 
+
         // Iterate the existing columns and override if the mapping contains the matching value
         for(Integer i=0,max=oldNames.size();i<max;i++){
             newNames.add((oldNameNewNameMap.containsKey(oldNames[i])) ? oldNameNewNameMap.get(oldNames[i]) : oldNames[i]);
@@ -608,6 +595,30 @@ global with sharing class JsnTbl {
                 for(String key : this.keyValueData[row].keySet()){
                     this.csvData[row+offset][this.columnIndexMap.get(key)] = String.valueOf(this.keyValueData[row].get(key))?.escapeCsv();
                 }
+            }
+        }
+    }
+
+
+    /**
+     * @description Method to validate that input colum names exist
+     * @param columnNames Test set of input columns
+     * @trhows      Jsn.JsonUtilException when the column name is invalid
+     */
+    @TestVisible
+    private void validateColumnNames( Set<String> columnNames){
+
+        // Input validation on the input set
+        if(columnNames == null || columnNames.isEmpty()){
+            throw new Jsn.JsonUtilException(EMPTY_COLUMNS_MSG);
+        }
+
+        // Input validation for the column names
+        for(String columnName : columnNames){
+            if(!this.columnNames.contains(columnName)){
+                throw new Jsn.JsonUtilException(String.format(
+                    COLUMN_DOES_NOT_EXIST_MSG, new String[]{columnName})
+                );
             }
         }
     }

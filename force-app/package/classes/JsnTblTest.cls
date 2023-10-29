@@ -165,4 +165,86 @@ private with sharing class JsnTblTest {
         Assert.areEqual(4, table.getColumnNameIndexMap().get('2'));
         Assert.areEqual(5, table.getColumnNameIndexMap().get('end'));
     }
+
+    @IsTest
+    static void testManipulation(){
+        
+        // Table to assert against
+        JsnTbl table;
+
+        // Start the test
+        Test.startTest();
+        System.runAs(TST_USER){
+
+            table = new JsnTbl()
+                .create(JSON.deserializeUntyped('[{"key1" : "1.1","key2" : "1.2","key3" : "1.3" },{"key1" : "2.1","key2" : "2.2" }]'))
+                .fillColumnsWithNullValue(new Set<String>{'key3'})
+                .concatColumnData(new Set<String>{'key1','key2'}, '_', 'CONCAT_COL', 10)
+                .deleteColumns(new Set<String>{'key1'})
+                .updateColumnNames(new Map<String,String>{
+                    'key2' => 'Column01',
+                    'key3' => 'Column02'
+                })
+                // Validate the input for coverage
+                .updateColumnNames(new Map<String,String>())
+                .updateColumnNames(new Set<String>())
+            ;
+        }
+        Test.stopTest();
+
+        System.debug( table.getColumnNames());
+        System.debug( table.getColumnNameIndexMap());
+
+        // There should be 3 columns
+        Assert.areEqual(3,  table.getColumnNames().size());
+        Assert.areEqual(3,  table.getColumnNameIndexMap().size());
+
+        // There should 2 rows of data
+        Assert.areEqual(2, table.getKeyValueData().size());
+
+        // Validate the column names
+        Assert.areEqual(table.getColumnNames(), new String[]{'Column01','Column02','CONCAT_COL'});
+    }
+
+    @IsTest
+    static void testValidateColumnNames(){
+         
+
+        // Variables to assert against
+        JsnTbl table;
+        Exception emptyColumnsException;
+        Exception invalidColumnsException;
+
+        // Start the test
+        Test.startTest();
+        System.runAs(TST_USER){
+            
+            table = new JsnTbl()
+                .create(JSON.deserializeUntyped('[{"key1" : "1.1","key2" : "1.2","key3" : "1.3" }]'))
+            ;
+
+            try{
+                table.validateColumnNames(null);
+
+                // This method will fail the test as it should not be reached
+                utl.Tst.assertExceptionHasBeenThrow();
+            }catch(Exception e){
+                emptyColumnsException = e;
+            }
+
+            try{
+                table.validateColumnNames(new Set<String>{'invalid'});
+                
+                // This method will fail the test as it should not be reached
+                utl.Tst.assertExceptionHasBeenThrow();
+            }catch(Exception e){
+                invalidColumnsException = e;
+            }
+        }
+        Test.stopTest();
+
+        // Validate the exception messages
+        utl.Tst.assertExceptionMessage(JsnTbl.EMPTY_COLUMNS_MSG, emptyColumnsException);
+        utl.Tst.assertExceptionMessage(JsnTbl.COLUMN_DOES_NOT_EXIST_MSG, 'invalid', invalidColumnsException);
+    }
 }

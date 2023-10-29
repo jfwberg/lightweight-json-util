@@ -3,7 +3,7 @@ try{
 	
 	//setQuery(callout, 'SELECT Id, EventType, LogFile FROM EventLogFile');
 	setSObjectDescribe(callout,'EventLogFile');
-	//setOAS3Spec(callout, new String[]{'/services/data/v58.0/sobjects/EventLogFile/{id}'});
+	//setOAS3Spec(callout, new String[]{'/services/data/v59.0/sobjects/EventLogFile/{id}'});
 	//setOAS3SpecProgress(callout, 'NTByNlMwMDAwMDBQQXNE');
 	
 	callout.call();

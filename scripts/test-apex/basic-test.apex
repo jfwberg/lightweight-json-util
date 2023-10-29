@@ -32,7 +32,7 @@ try{
     ;   
 
     // Output the result as a csv
-    System.debug(table.getConsoleString());
+    System.debug(table.getCsvString());
     
 }catch(Exception e){
     
@@ -64,7 +64,7 @@ private static String getQueryResponseBody(String query, Boolean isTooling){
     
     Http http = new Http();
     HttpRequest httpRequest = new HttpRequest();
-    httpRequest.setEndpoint(URL.getSalesforceBaseUrl().toExternalForm() + '/services/data/v58.0/'+ (IsTooling ? 'tooling/' : '' ) +'query?q=' + EncodingUtil.urlEncode(query, 'UTF-8'));
+    httpRequest.setEndpoint(URL.getOrgDomainUrl().toExternalForm() + '/services/data/v59.0/'+ (IsTooling ? 'tooling/' : '' ) +'query?q=' + EncodingUtil.urlEncode(query, 'UTF-8'));
     httpRequest.setMethod('GET');
     httpRequest.setHeader('Content-Type', 'application/json;charset=UTF-8');
     httpRequest.setHeader('Authorization', 'Bearer ' + userInfo.getSessionId());
