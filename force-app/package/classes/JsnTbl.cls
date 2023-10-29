@@ -145,6 +145,74 @@ global with sharing class JsnTbl {
         return this;
     }
 
+    
+    /**
+     * @description There are scenarios where you want to fill empty values with a custom value.
+     *              This method allows you to pad the empty values with a value of your choice
+     * @param columnNames The names of columns that will be added as a key item for records
+     *                    that do not have the specific key
+     * @return self
+     */
+    global JsnTbl fillNullValuesWithCustomValue(Map<String,Object> columnNameValueMap){
+
+        // Validate the input
+        validateColumnNames(columnNameValueMap.keySet());
+
+        // Convert to string list for faster iterations later.
+        // Seems overkill but integer loops are significantly faster when we're talking about 1000+ rows
+        String[] columnNameList = new List<String>(columnNameValueMap.keySet());
+        Integer numberOfColumns = columnNameList.size();
+
+        // Iterate each record in the row
+        for(Integer i = 0, max=this.keyValueData.size(); i < max; i++){
+            
+            // If the record does not contain a certain key, add a null value
+            for(Integer j = 0; j < numberOfColumns; j++){
+                if(this.keyValueData[i].containsKey(columnNameList[j]) && this.keyValueData[i].get(columnNameList[j]) == null){
+                    this.keyValueData[i].put(columnNameList[j],columnNameValueMap.get(columnNameList[j]));
+                }
+            }
+        }
+        
+        // return self
+        return this;
+    }
+
+
+    /**
+     * @description There are scenarios where you want to fill empty values with a value from
+     *              a different column. For instance you have a merged table with parent and child records
+     *              and you want to populate the parent Id in each column of the child to normalize a table.
+     * @param sourceTargetColumnMap The name of the source and target columns. Null values will be overwritten
+     *                              with the value of the target column
+     * @return self
+     */
+    global JsnTbl fillNullValuesWithColumnValue(Map<String,String> sourceTargetColumnMap){
+        
+        // Validate the input (both source and target names)
+        validateColumnNames(sourceTargetColumnMap.keySet());
+        validateColumnNames(new Set<String>(sourceTargetColumnMap.values()));
+
+        // Convert to string list for faster iterations later.
+        // Seems overkill but integer loops are significantly faster when we're talking about 1000+ rows
+        String[] columnNameList = new List<String>(sourceTargetColumnMap.keySet());
+        Integer numberOfColumns = columnNameList.size();
+
+        // Iterate each record in the row
+        for(Integer i = 0, max=this.keyValueData.size(); i < max; i++){
+            
+            // If the record does not contain a certain key, add a null value
+            for(Integer j = 0; j < numberOfColumns; j++){
+                if(this.keyValueData[i].containsKey(columnNameList[j]) && this.keyValueData[i].get(columnNameList[j]) == null){
+                    this.keyValueData[i].put(columnNameList[j],this.keyValueData[i].get(sourceTargetColumnMap.get(columnNameList[j])));
+                }
+            }
+        }
+
+        // return self
+        return this;
+    }
+
 
     /** **************************************************************************************************** **
      **                                  GLOBAL MANIPULATE SUPPORT METHODS                                   **

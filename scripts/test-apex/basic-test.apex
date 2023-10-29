@@ -11,24 +11,31 @@ try{
     // Create a data table from a Salesforce API query response
     utl.JsnTbl table = new utl.JsnTbl()
         // Run before create
-		.setAttributeFilter(new Set<String>{'attributes', 'done'})
-		.setListNameFilter(new Set<String>{'records'})
-		
-		// Create the table
+        .setAttributeFilter(new Set<String>{'attributes', 'done'})
+        .setListNameFilter(new Set<String>{'records'})
+        
+        // Create the table
         .create((Object[]) ((Map<String,Object>)JSON.deserializeUntyped(jsonString)).get('records'))
-		.fillColumnsWithNullValue(new Set<String>{'Name'})
-		
-		// Make sure these run after the create method
-		.concatColumnData(new Set<String>{'Contacts.AccountId','Contacts.Id'}, '_', 'ACC_CON_CONCAT_ID', 1)
-		.concatColumnData(new Set<String>{'Contacts.FirstName','Contacts.LastName'}, ' ', 'CONTACT_FULL_NAME', 2)
-		.deleteColumns(new Set<String>{'Id','Contacts.AccountId','Contacts.Id'})
-		
-		// Make sure this method is run last to prevent null pointer exceptions
-		.updateColumnNames(new Map<String,String>{
-			'Name' => 'Account Name',
-			'Contacts.totalSize' => 'Number_of_Contacts'
-		})
-		
+        .fillColumnsWithNullValue(new Set<String>{'Name'})
+        
+        // Make sure these run after the create method
+        .concatColumnData(new Set<String>{'Contacts.AccountId','Contacts.Id'}, '_', 'ACC_CON_CONCAT_ID', 1)
+        .concatColumnData(new Set<String>{'Contacts.FirstName','Contacts.LastName'}, ' ', 'CONTACT_FULL_NAME', 2)
+        .deleteColumns(new Set<String>{'Id','Contacts.AccountId','Contacts.Id'})
+
+        // Add to example
+        .fillColumnsWithNullValue(new Set<String>{'Id','Name'})
+		.fillNullValuesWithCustomValue(new Map<String,String>{'Name' => 'Unknown Account Name'})
+		.fillNullValuesWithColumnValue(new Map<String,String>{'Id'   => 'Contacts.AccountId'})
+		.fillNullValuesWithColumnValue(new Map<String,String>{'Id'   => 'Opportunities.AccountId'})
+
+        
+        // Make sure this method is run last to prevent null pointer exceptions
+        .updateColumnNames(new Map<String,String>{
+            'Name' => 'Account Name',
+            'Contacts.totalSize' => 'Number_of_Contacts'
+        })
+        
     ;   
 
     // Output the result as a csv
