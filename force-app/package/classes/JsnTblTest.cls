@@ -192,9 +192,6 @@ private with sharing class JsnTblTest {
         }
         Test.stopTest();
 
-        System.debug( table.getColumnNames());
-        System.debug( table.getColumnNameIndexMap());
-
         // There should be 3 columns
         Assert.areEqual(3,  table.getColumnNames().size());
         Assert.areEqual(3,  table.getColumnNameIndexMap().size());
@@ -206,10 +203,45 @@ private with sharing class JsnTblTest {
         Assert.areEqual(table.getColumnNames(), new String[]{'Column01','Column02','CONCAT_COL'});
     }
 
+
+    @IsTest
+    static void testColumnFills(){
+        
+        // Table to assert against
+        JsnTbl table;
+
+        // Start the test
+        Test.startTest();
+        System.runAs(TST_USER){
+
+            table = new JsnTbl()
+                .create(JSON.deserializeUntyped('[{"key1" : "1.1","key2" : "1.2","key3" : "1.3" },{"key1" : "2.1","key2" : "2.2" },{"key1" : "3.1"}]'))
+                .fillColumnsWithNullValue(new Set<String>{'key2','key3'})
+                .fillNullValuesWithCustomValue(new Map<String,String>{'key2' => 'CUSTOM_VALUE'})
+		        .fillNullValuesWithColumnValue(new Map<String,String>{'key3' => 'key1'})
+            ;
+        }
+        Test.stopTest();
+
+        // There should be 3 columns
+        Assert.areEqual(3,  table.getColumnNames().size());
+        Assert.areEqual(3,  table.getColumnNameIndexMap().size());
+
+        // There should 2 rows of data
+        Assert.areEqual(3, table.getKeyValueData().size());
+        
+        // Expecting column 2 to have a custom value
+        Assert.areEqual('CUSTOM_VALUE', table.getIndexedData()[2][1]);
+
+        // Expecting the the value ofcloumn 3 to have the value of column 1
+        Assert.areEqual('2.1', table.getIndexedData()[1][2]);
+        Assert.areEqual('3.1', table.getIndexedData()[2][2]);
+    }
+
+
     @IsTest
     static void testValidateColumnNames(){
          
-
         // Variables to assert against
         JsnTbl table;
         Exception emptyColumnsException;
