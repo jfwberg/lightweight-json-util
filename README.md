@@ -4,10 +4,21 @@ The JSON Table Utility transforms nested key/value data structures into a flat d
 It handles multiple data output formats including CSV and is optimised for the use of Salesforce REST Query API Responses.
 
 ## Dependency info
-
+| Info | Value |
+|---|---|
+|Name|Lightweight - Apex Unit Test Util v2|
+|Version|2.3.0-1|
+|Managed Installation URL | */packaging/installPackage.apexp?p0=04tP30000007oePIAQ*
+|Unlocked Installation URL| */packaging/installPackage.apexp?p0=04tP30000007og1IAA*
+|Github URL | https://github.com/jfwberg/lightweight-apex-unit-test-util-v2
 
 ## Package Info
-
+| Info | Value |
+|---|---|
+|Name|Lightweight - JSON Util|
+|Version|0.4.0-1|
+|Managed Installation URL | */packaging/installPackage.apexp?p0=04tP30000008cL3IAI*
+|Unlocked Installation URL| */packaging/installPackage.apexp?p0=04tP30000008cMfIAI* 
 
 
 ## Methods to fetch Objects, Object Maps and Object Lists from an untyped Object Map
