@@ -7,18 +7,18 @@ It handles multiple data output formats including CSV and is optimised for the u
 | Info | Value |
 |---|---|
 |Name|Lightweight - Apex Unit Test Util v2|
-|Version|2.3.0-1|
-|Managed Installation URL | */packaging/installPackage.apexp?p0=04tP30000007oePIAQ*
-|Unlocked Installation URL| */packaging/installPackage.apexp?p0=04tP30000007og1IAA*
+|Version|2.4.0-1|
+|Managed Installation URL | */packaging/installPackage.apexp?p0=04tP3000000M6OXIA0*
+|Unlocked Installation URL| */packaging/installPackage.apexp?p0=04tP3000000M6Q9IAK*
 |Github URL | https://github.com/jfwberg/lightweight-apex-unit-test-util-v2
 
 ## Package Info
 | Info | Value |
 |---|---|
 |Name|Lightweight - JSON Util|
-|Version|0.4.0-1|
-|Managed Installation URL | */packaging/installPackage.apexp?p0=04tP30000008cL3IAI*
-|Unlocked Installation URL| */packaging/installPackage.apexp?p0=04tP30000008cMfIAI* 
+|Version|0.5.0-1|
+|Managed Installation URL | */packaging/installPackage.apexp?p0=04tP3000000M6mjIAC*
+|Unlocked Installation URL| */packaging/installPackage.apexp?p0=04tP3000000M6pxIAC* 
 
 
 ## Methods to fetch Objects, Object Maps and Object Lists from an untyped Object Map
@@ -105,9 +105,10 @@ Column headers are stored in the order they appear in the JSON and cannot be sor
 ## Output (table) formats
 |Type|format Example|Data Type|Note|
 |--------|-------------|---|---|
-|Key Value Pairs|```[{"row_1_col_1" : "row_1_col_1_value", "row_1_col_2" : "row_1_col_2_value"}, {"row_2_col_1" : "row_2_col_1_value", "row_2_col_2" : "row_2_col_2_value"}]``` | ```List<Map<String,Object>>```| Ideal for Javascript handling
+|Key Value Data |```[{"row_1_col_1" : "row_1_col_1_value", "row_1_col_2" : "row_1_col_2_value"}, {"row_2_col_1" : "row_2_col_1_value", "row_2_col_2" : "row_2_col_2_value"}]``` | ```List<Map<String,Object>>```| Ideal for Javascript handling
 |Indexed Data   |```[["row_1_col_1_value","row_1_col_2_value"],["row_2_col_1_value","row_2_col_2_value"]]``` |```List<List<Object>>```|Allows for the use of matrix indexes i.e. ```value = table[1][19]```|
 |CSV Data       |```[["header_col_1","header_col_2"],["row_1_col_1_value","row_1_col_2_value"],["row_2_col_1_value","row_2_col_2_value"]]``` |```List<List<String>>```|Same as Indexed but all values are Strings and CSV escaped|
+|Key Value Pairs|```[{"key" : "key_row1", "value" : "value_row1"},{"key" : "key_row2", "value" : "value_row2"}]``` |```List<List<String>>```|Inverted table view, only works well with single JSON result, table headers can not be used|
 |CSV String     |```"header_col_1", "header_col_2" <br/> "row_1_col_1_value","row_1_col_2_value" <br/> "row_2_col_1_value","row_2_col_2_value"``` |```String```|CSV data converted to a usable CSV string|
 |Console String |```"header_col_1", "header_col_2" <br/> "row_1_col_1_value","row_1_col_2_value" <br/> "row_2_col_1_value","row_2_col_2_value"``` |```String```|Table data converted to a human readable spaced string that is readable in a console, this is mainly for debugging and previewing purposes|
 
@@ -158,6 +159,7 @@ Once your table is created you can now extract the data using one of the followi
 | ```getKeyValueData()```      | ```List<Map<String,Object>>``` |Get a key/value pair data structure|
 | ```getIndexedData()```       | ```List<Object[]>```           |Get a multi-dimentional array data structure|
 | ```getCsvData()```           | ```List<String[]>```           |Get a multi-dimentional array with header row and csv encoded values|
+| ```getKeyValuePairData()```  | ```List<Map<String,Object>>``` |Get a list of key/value pairs for inverted tables|
 | ```getCsvString()```         | ```String```                   |Get a CSV formatted String|
 | ```getConsoleString()```     | ```String```                   |Get a human readable formatted table with equally spaced out columns based on the largest value (Testing only and resource intensive, not for large tables and expect CPU or heap size issues)|
 | ```getColumnNames()```       | ```String[]```                 |Get a list of column names in the order of the JSON input|
@@ -233,20 +235,12 @@ try{
     
     // Offending code here
     
+}catch(System.JSONException e){
+   System.debug('Invalid JSON Exception: ' + e.getMessage()); 
+}catch(System.JsonUtilException e){
+    System.debug('JSON Util Exeption: '    + e.getMessage()); 
 }catch(Exception e){
-    
-    // Handle JSON related exceptions
-    if(       e.getTypeName() == String.valueOf(System.JSONException.class)){
-        System.debug('Invalid JSON Exception: ' + e.getMessage()); 
-    
-    // Handle JSON Util related Exceptions
-    }else if (e.getTypeName() == String.valueOf(utl.Jsn.JsonUtilException.class)){
-        System.debug('JSON Util Exeption: '     + e.getMessage()); 
-    
-    // Handle Unknown Exceptions
-    }else {
-        System.debug('Unknown Exeption: '       + e.getMessage());
-    }
+    System.debug('Unknown Exeption: '      + e.getMessage());
 }
 ```
 

@@ -99,6 +99,9 @@ private with sharing class JsnTblTest {
 
         // There should 6 rows of data
         Assert.areEqual(6, table.getKeyValueData().size());
+
+        // There should be 11 key value pairs
+        Assert.areEqual(11, table.getKeyValuePairData().size());
     }
 
 

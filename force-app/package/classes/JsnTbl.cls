@@ -42,6 +42,9 @@ global with sharing class JsnTbl {
     // The output containing the CSV data
     private List<String[]> csvData = new List<String[]>();
 
+    // The output containing key value pairs
+    private List<Map<String,Object>> keyValuePairData = new List<Map<String,Object>>();
+
 
     /** **************************************************************************************************** **
      **                                          PRIVATE CONSTANTS                                           **
@@ -494,6 +497,22 @@ global with sharing class JsnTbl {
 
 
     /**
+     * @description Method to generate key/value pair data
+     * @return      A list of key value pairs for each individual row.
+     *              This is used To create tables where the key value is the header.
+     *              Commonly seen in overview tables
+     */
+    global List<Map<String,Object>> getKeyValuePairData(){
+        
+        // Run creation logic
+        this.createKeyValuePairData();
+
+        // Return the indexed data
+        return this.keyValuePairData;
+    }
+
+
+    /**
      * @description Method to generate a CSV string from the CSV data
      * @return      A CSV string from the table
      */
@@ -663,6 +682,23 @@ global with sharing class JsnTbl {
                 for(String key : this.keyValueData[row].keySet()){
                     this.csvData[row+offset][this.columnIndexMap.get(key)] = String.valueOf(this.keyValueData[row].get(key))?.escapeCsv();
                 }
+            }
+        }
+    }
+
+
+    /**
+     * @description Method to generate key value pairs from the key/value data
+     */
+    private void createKeyValuePairData(){
+        for(Integer i=0, max = this.keyValueData.size(); i < max; i++){
+            for(String key : this.keyValueData[i].keyset()){
+                this.keyValuePairData.add(
+                    new Map<String,Object>{
+                        'key' => key,
+                        'value' => this.keyValueData[i].get(key)
+                    }
+                );
             }
         }
     }

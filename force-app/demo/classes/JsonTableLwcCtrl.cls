@@ -3,23 +3,27 @@ public with sharing class JsonTableLwcCtrl {
 
     @AuraEnabled
     public static Map<String,Object> createTable(String jsonString, Boolean numberColumn, String attributeFilter, String listNameFilter, String cacheBust){
-        return (Map<String,Object> ) createOutput(jsonString, numberColumn, attributeFilter, listNameFilter, false, false);  
+        return (Map<String,Object> ) createOutput(jsonString, numberColumn, attributeFilter, listNameFilter, false, false,false);  
     }
 
+    @AuraEnabled
+    public static Map<String,Object> createKeyValueTable(String jsonString, Boolean numberColumn, String attributeFilter, String listNameFilter, String cacheBust){
+        return (Map<String,Object> ) createOutput(jsonString, numberColumn, attributeFilter, listNameFilter, false, false,true);  
+    }
 
     @AuraEnabled
     public static String createCsv(String jsonString, Boolean numberColumn, String attributeFilter, String listNameFilter, String cacheBust){
-       return (String ) createOutput(jsonString, numberColumn, attributeFilter, listNameFilter, true, false);  
+       return (String ) createOutput(jsonString, numberColumn, attributeFilter, listNameFilter, true, false,false);  
     }
 
 
     @AuraEnabled
     public static String createConsole(String jsonString, Boolean numberColumn, String attributeFilter, String listNameFilter, String cacheBust){
-       return (String ) createOutput(jsonString, numberColumn, attributeFilter, listNameFilter, true, true);  
+       return (String ) createOutput(jsonString, numberColumn, attributeFilter, listNameFilter, true, true, false);  
     }
 
     
-    private static Object createOutput(String jsonString, Boolean numberColumn, String attributeFilter, String listNameFilter, Boolean returnCsv, Boolean returnConsole){
+    private static Object createOutput(String jsonString, Boolean numberColumn, String attributeFilter, String listNameFilter, Boolean returnCsv, Boolean returnConsole, Boolean returnKeyValue){
         try {
             // The filter sets
             Set<String> attributeFilterSet;
@@ -56,6 +60,13 @@ public with sharing class JsonTableLwcCtrl {
                     columnData.add(i);
                 }
                 table.upsertColumnData('#', columnData, 0);
+            }
+
+            if(returnKeyValue){
+                return new Map<String,Object>{
+                    'columns' => new String[]{'key','value'},
+                    'data'    => table.getKeyValuePairData()
+                };
             }
 
             // return the csv or the data and columns

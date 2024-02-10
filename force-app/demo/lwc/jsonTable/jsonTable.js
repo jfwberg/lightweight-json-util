@@ -1,10 +1,11 @@
-import LightningModal   from 'lightning/modal';
-import LightningAlert   from 'lightning/alert';
-import TableResultModal from 'c/resultModal';
-import CsvResultModal   from 'c/csvResultModal';
-import createCsv        from '@salesforce/apex/JsonTableLwcCtrl.createCsv';
-import createTable      from '@salesforce/apex/JsonTableLwcCtrl.createTable';
-import createConsole    from '@salesforce/apex/JsonTableLwcCtrl.createConsole';
+import LightningModal      from 'lightning/modal';
+import LightningAlert      from 'lightning/alert';
+import TableResultModal    from 'c/resultModal';
+import CsvResultModal      from 'c/csvResultModal';
+import createCsv           from '@salesforce/apex/JsonTableLwcCtrl.createCsv';
+import createTable         from '@salesforce/apex/JsonTableLwcCtrl.createTable';
+import createKeyValueTable from '@salesforce/apex/JsonTableLwcCtrl.createKeyValueTable';
+import createConsole       from '@salesforce/apex/JsonTableLwcCtrl.createConsole';
 
 export default class JsonTable extends LightningModal {
 	
@@ -74,6 +75,55 @@ export default class JsonTable extends LightningModal {
         });
 		
 	}
+
+    handleClickCreateKeyValueTable(){
+		
+        this.loading =true;
+			
+        createKeyValueTable({ 
+            jsonString        : this.jsonString,
+            numberColumn      : this.numberColumn,
+            attributeFilter   : this.attributeFilter,
+            listNameFilter    : this.listNameFilter,
+            cacheBust         : this._cacheBust
+        })
+        .then(data => {
+            try{
+                // Create lightning data columns for the result table in the modal
+                let columns = [];    
+
+                for (let index = 0; index <data.columns.length; index++) {
+                    columns.push({ 
+                        label        : data.columns[index],
+                        fieldName    : data.columns[index],
+                        initialWidth : data.columns[index].length < 10 ? 120 : (data.columns[index].length * 12)
+                    });
+                }
+
+                // Open the modal
+                this.handleOpenTableResultModal({"columns" : columns, "data" : data.data});
+
+            }catch(error){
+                LightningAlert.open({
+                    message: error.message,
+                    label: 'Error',
+                    theme : 'error'
+                });
+            }
+        })
+        .catch(error => {
+            LightningAlert.open({
+                message: error.body.message,
+                label: 'Error',
+                theme : 'error'
+            });
+        })
+        .finally(() => {
+            this.loading = false;
+        });
+		
+	}
+
 
 
     /** **************************************************************************************************** **
