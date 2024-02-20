@@ -150,6 +150,7 @@ Once you have created your table and you can now add new static columns or remov
 Once you have created your table and you are done adding or removing columns you have to options to rename the headers of your columns. Always run this method last to prevent null pointer exceptions
 
 | Method | Description |
+|--------|-------------|
 | ```updateColumnNames(Set<String>)```        | This needs to run after the create methods. It allows you to set your own column names. These need to be in order of the data. This is especially useful when you have a Data Cloud Query response.|
 | ```updateColumnNames(Map<String,String>)``` | This needs to run after the create methods. It allows you to set your own column names. This can be any number of values as long as the source column name has a matching target name. This is really useful when you need to convert CSV headers to a target system.|
 
