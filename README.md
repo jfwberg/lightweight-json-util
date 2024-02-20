@@ -140,6 +140,8 @@ Optionally you can fill your columns with null values.
 
 ### Manipulate
 Once you have created your table and you can now add new static columns or remove columns you don't need
+| Method | Description |
+|--------|-------------|
 | ```upsertColumnData(String columnName, Object[] columnValues, Integer columnIndex)``` | This needs to run after the create method. It allows you to add a column or update a columm. This can be useful to add a number column or an UUID column or override an random id number or timestamp. It can also be handy if you need to add any static column data for system updates. |
 | ```concatColumnData(Set<String> columnNames, String glue, String outputColumnName,  Integer outputColumnIndex)``` | This method concates the data multiple columns and puts them in a new column. This is useful to generate combined keys. Its uses the above method but has a pre-built most used method.|
 | ```deleteColums(Set<String> columnNames``` | This method allows you to remove columns you don't need from the table |
