@@ -1,7 +1,6 @@
 {
 	"orgName": "Lightweight - JSON Util",
 	"edition": "Enterprise",
-    "release": "preview",
 	"features": [
 		"EnableSetPasswordInApi"
 	],

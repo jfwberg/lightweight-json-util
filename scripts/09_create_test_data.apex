@@ -1,15 +1,15 @@
 /**
  * Run 1 by 1 to prevent govenor limits
  */
-//insertAccounts();
+insertAccounts();
 insertContacts();
-//insertOpportunities();
+insertOpportunities();
 
 public void insertAccounts(){
     
     Account[] accounts = new Account[]{};
 
-    for (Integer i = 0; i < 1000; i++) {
+    for (Integer i = 0; i < 3; i++) {
     
         // A postfix to keep track of what item we're dealing with
         String postfix = String.valueOf(i+1).leftPad(4,'0');
@@ -30,7 +30,7 @@ public void insertContacts(){
 
 
     for(integer i=0, max=accounts.size(); i<max; i++){
-        for(integer j=1; j< 11; j++){
+        for(integer j=1; j< 4; j++){
         
             // Postfix to keep track of where we are
             String postfix = String.valueOf(i+1).leftPad(4,'0') + ' - ' + String.valueOf(j).leftPad(2,'0');
@@ -53,7 +53,7 @@ public void insertOpportunities(){
     Opportunity[] opportunities = new Opportunity[]{};
 
     for(integer i=0, max=accounts.size(); i<max; i++){
-        for(integer j=1; j< 11; j++){
+        for(integer j=1; j< 4; j++){
         
             // Postfix to keep track of where we are
             String postfix = String.valueOf(i+1).leftPad(4,'0') + ' - ' + String.valueOf(j).leftPad(2,'0');

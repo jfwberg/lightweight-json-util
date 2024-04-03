@@ -1,50 +1,58 @@
 {
-  "packageDirectories": [
-    {
-      "path": "force-app/package",
-      "default": true,
-      "package": "Lightweight - JSON Util",
-      "versionName": "v60.0 - 0.5",
-      "versionNumber": "0.5.0.NEXT",
-      "versionDescription": "A lightweight Apex utility for path based traversing of untyped Object Maps and converting JSON to a flat Data Table or CSV format",
-      "ancestorVersion": "0.4.0",
-      "dependencies": [
+    "packageDirectories": [
         {
-          "package": "Lightweight - Apex Unit Test Util v2@2.4.0-1"
-        }
-      ]
-    },
-    {
-      "path": "force-app/package",
-      "default": false,
-      "package": "Lightweight - JSON Util (Unlocked)",
-      "versionName": "v60.0 - 0.5",
-      "versionNumber": "0.5.0.NEXT",
-      "versionDescription": "A lightweight Apex utility for path based traversing of untyped Object Maps and converting JSON to a flat Data Table or CSV format",
-      "dependencies": [
+            "path": "force-app/package",
+            "default": true,
+            "package": "Lightweight - JSON Util",
+            "versionName": "v60.0 - 0.5",
+            "versionNumber": "0.5.0.NEXT",
+            "versionDescription": "A lightweight Apex utility for path based traversing of untyped Object Maps and converting JSON to a flat Data Table or CSV format",
+            "ancestorVersion": "0.4.0",
+            "dependencies": [
+                {
+                    "package": "Lightweight - Apex Unit Test Util v2@2.4.0-1"
+                },
+                {
+                    "package": "Lightweight - Apex LWC Util@0.3.0-3"
+                }
+            ]
+        },
         {
-          "package": "Lightweight - Apex Unit Test Util v2 (Unlocked)@2.4.0-1"
+            "path": "force-app/package",
+            "default": false,
+            "package": "Lightweight - JSON Util (Unlocked)",
+            "versionName": "v60.0 - 0.5",
+            "versionNumber": "0.5.0.NEXT",
+            "versionDescription": "A lightweight Apex utility for path based traversing of untyped Object Maps and converting JSON to a flat Data Table or CSV format",
+            "dependencies": [
+                {
+                    "package": "Lightweight - Apex Unit Test Util v2 (Unlocked)@2.4.0-1"
+                },
+                {
+                    "package": "Lightweight - Apex LWC Util (Unlocked)@0.3.0-1"
+                }
+            ]
         }
-      ]
+    ],
+    "name": "lightweight-json-util",
+    "namespace": "utl",
+    "sfdcLoginUrl": "https://login.salesforce.com",
+    "sourceApiVersion": "60.0",
+    "packageAliases": {
+        "Lightweight - Apex Unit Test Util v2@2.4.0-1": "04tP3000000M6OXIA0",
+        "Lightweight - Apex Unit Test Util v2 (Unlocked)@2.4.0-1": "04tP3000000M6Q9IAK",
+        "Lightweight - Apex LWC Util@0.3.0-3": "04tP3000000R7F7IAK",
+        "Lightweight - Apex LWC Util (Unlocked)@0.3.0-1": "04tP3000000R7GjIAK",
+        "Lightweight - JSON Util": "0HoP3000000006TKAQ",
+        "Lightweight - JSON Util@0.1.0-1": "04tP30000005PYrIAM",
+        "Lightweight - JSON Util@0.2.0-1": "04tP30000007y99IAA",
+        "Lightweight - JSON Util@0.3.0-1": "04tP30000008XejIAE",
+        "Lightweight - JSON Util@0.4.0-1": "04tP30000008cL3IAI",
+        "Lightweight - JSON Util@0.5.0-1": "04tP3000000M6mjIAC",
+        "Lightweight - JSON Util (Unlocked)": "0HoP3000000009hKAA",
+        "Lightweight - JSON Util (Unlocked)@0.2.0-1": "04tP30000007yfNIAQ",
+        "Lightweight - JSON Util (Unlocked)@0.3.0-1": "04tP30000008XgLIAU",
+        "Lightweight - JSON Util (Unlocked)@0.4.0-1": "04tP30000008cMfIAI",
+        "Lightweight - JSON Util (Unlocked)@0.5.0-1": "04tP3000000M6pxIAC"
     }
-  ],
-  "name": "lightweight-json-util",
-  "namespace": "utl",
-  "sfdcLoginUrl": "https://login.salesforce.com",
-  "sourceApiVersion": "60.0",
-  "packageAliases": {
-    "Lightweight - Apex Unit Test Util v2@2.4.0-1": "04tP3000000M6OXIA0",
-    "Lightweight - Apex Unit Test Util v2 (Unlocked)@2.4.0-1": "04tP3000000M6Q9IAK",
-    "Lightweight - JSON Util": "0HoP3000000006TKAQ",
-    "Lightweight - JSON Util@0.1.0-1": "04tP30000005PYrIAM",
-    "Lightweight - JSON Util@0.2.0-1": "04tP30000007y99IAA",
-    "Lightweight - JSON Util@0.3.0-1": "04tP30000008XejIAE",
-    "Lightweight - JSON Util@0.4.0-1": "04tP30000008cL3IAI",
-    "Lightweight - JSON Util@0.5.0-1": "04tP3000000M6mjIAC",
-    "Lightweight - JSON Util (Unlocked)": "0HoP3000000009hKAA",
-    "Lightweight - JSON Util (Unlocked)@0.2.0-1": "04tP30000007yfNIAQ",
-    "Lightweight - JSON Util (Unlocked)@0.3.0-1": "04tP30000008XgLIAU",
-    "Lightweight - JSON Util (Unlocked)@0.4.0-1": "04tP30000008cMfIAI",
-    "Lightweight - JSON Util (Unlocked)@0.5.0-1": "04tP3000000M6pxIAC"
-  }
 }
