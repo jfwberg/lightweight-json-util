@@ -38,18 +38,20 @@
         </div>
         
         <lightning-tabset>
-            <lightning-tab label="Input">
+            <lightning-tab label="Input">    
 
+                <c-cm-textarea
+                    onloadingcomplete = {handleCodemirrorLoaded}
+                    onsave            = {handleCodemirrorSave}
+                    disabled          = {codemirrorDisabled}
+                    value             = {codemirrorValue} 
+                    theme             = {codemirrorTheme}
+                    mode              = {codemirrorMode} 
+                    class             = "ta"
+                ></c-cm-textarea>
+
+                   
                 <div class="slds-p-around_x-small">
-                    
-                    <div class="slds-var-p-bottom_medium">
-                        <div class="slds-form-element">
-                            <div class="slds-form-element__control">
-                                <textarea id="ta" placeholder="JSON String..." class="slds-textarea ta" onchange={handleChangeJsonString}>{jsonString}</textarea>
-                            </div>
-                        </div>
-                    </div>
-
                     <lightning-combobox
                         name        = "Filter preset"
                         label       = "Filter preset"
@@ -78,7 +80,7 @@
                 </div>
             </lightning-tab>
 
-            <lightning-tab label="Table Options">
+            <lightning-tab label="Data Manipulation">
                 <div class="slds-p-around_x-small">
                     <lightning-input 
                         type="checkbox"
@@ -90,7 +92,7 @@
                 </div>
             </lightning-tab>
 
-            <lightning-tab label="Output Options">
+            <lightning-tab label="Output">
                 <div class="slds-p-around_x-small">
                     <lightning-combobox
                         name        = "Output format"
@@ -100,6 +102,9 @@
                         options     = {outputFormatOptions}
                         onchange    = {handleChangeOutputFormat}
                     ></lightning-combobox>
+
+                    <c-cm-theme-picklist value={codemirrorResultTheme} onvaluechange={handleThemeChange} variant=""  label="Result Editor Theme"></c-cm-theme-picklist>
+                    
                 </div>
             </lightning-tab>
         </lightning-tabset>

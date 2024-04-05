@@ -5,9 +5,12 @@ import {LightningElement} from "lwc";
 import {handleError}      from 'c/util';
 
 // Custom Modals
+import cmModal            from 'c/cmModal';
 import ldtModal           from 'c/ldtModal';
 import textModal          from 'c/textModal';
-import textareaModal      from 'c/textareaModal';
+
+// Code mirror commands
+import {cmExists, setCmValue, getCmValue} from 'c/cmUtil'
 
 // apex methods
 import createTable        from '@salesforce/apex/JsonTableLwcCtrl.createTable';
@@ -39,12 +42,23 @@ export default class JsonTable extends LightningElement {
 
     // Input values
     path                = "";
-    jsonString          = "";
+    //jsonString          = "";
     outputFormatValue   = 'lwctable';
     filterPresetValue   = 'none';
     numberColumn        = false;
     attributeFilterValue= ""
     listNameFilterValue = "";
+
+    // CodeMirror Always set some default values
+    codemirrorClass     = 'ta';
+	codemirrorLoaded	= false;
+	codemirrorMode		= 'text/javascript';
+	codemirrorTheme		= 'default';
+	codemirrorValue		= '';
+	codemirrorDisabled	= false;
+
+    // Result modal codemirror theme
+    codemirrorResultTheme = 'default';
 
     // Output formats
     get filterPresetOptions() {
@@ -81,7 +95,7 @@ export default class JsonTable extends LightningElement {
 
         // Execute Apex
         createTable({ 
-            jsonString        : this.jsonString,
+            jsonString        : getCmValue(this.template, this.codemirrorClass),
             numberColumn      : this.numberColumn,
             attributeFilter   : this.attributeFilterValue,
             listNameFilter    : this.listNameFilterValue,
@@ -110,12 +124,12 @@ export default class JsonTable extends LightningElement {
                     }
 
                     case 'csvstring' :{
-                        textareaModal.open({
-                            
-                            // Modal info
-                            size             : 'large',
-                            label            : 'CSV String Result',
-                            content          : apexResponse,
+                        cmModal.open({
+                            size             : "large",
+                            header           : "CSV String",
+                            value            : apexResponse,
+                            mode             : "csv",
+                            theme            : this.codemirrorResultTheme,
                             disabled         : false,
                             
                             // Download info
@@ -133,13 +147,15 @@ export default class JsonTable extends LightningElement {
                         break;
                     }
 
-                    case 'consolestring' :{
-                        textareaModal.open({
+                    case 'consolestring' : {
+                        cmModal.open({
                             
                             // Modal info
-                            size             : 'large',
-                            label            : 'Console String Result',
-                            content          : apexResponse,
+                            size             : "large",
+                            header           : "Console String Result",
+                            value            : apexResponse,
+                            mode             : "text/plain",
+                            theme            : this.codemirrorResultTheme,
                             disabled         : false,
                             
                             // Download info
@@ -158,12 +174,14 @@ export default class JsonTable extends LightningElement {
                     }
 
                     case 'rawkeyvalue' :{
-                        textareaModal.open({
+                        cmModal.open({
                             
                             // Modal info
-                            size             : 'medium',
-                            label            : 'RAW Key/Value Result',
-                            content          : JSON.stringify(apexResponse,null,4),
+                            size             : "medium",
+                            header           : "RAW Key/Value Result",
+                            value            : JSON.stringify(apexResponse,null,4),
+                            mode             : "text/javascript",
+                            theme            : this.codemirrorResultTheme,
                             disabled         : false,
                             
                             // Download info
@@ -182,12 +200,13 @@ export default class JsonTable extends LightningElement {
                     }
 
                     case 'rawindexed' :{
-                        textareaModal.open({
-                            
+                        cmModal.open({
                             // Modal info
-                            size             : 'medium',
-                            label            : 'RAW Indexed Data Result',
-                            content          : JSON.stringify(apexResponse,null,4),
+                            size             : "medium",
+                            header           : "RAW Indexed Data Result",
+                            value            : JSON.stringify(apexResponse,null,4),
+                            mode             : "text/javascript",
+                            theme            : this.codemirrorResultTheme,
                             disabled         : false,
                             
                             // Download info
@@ -206,12 +225,13 @@ export default class JsonTable extends LightningElement {
                     }
 
                     case 'rawkeyvaluepair' :{
-                        textareaModal.open({
-                            
+                        cmModal.open({
                             // Modal info
-                            size             : 'medium',
-                            label            : 'RAW Key/Value Pair Data Result',
-                            content          : JSON.stringify(apexResponse,null,4),
+                            size             : "medium",
+                            header           : "RAW Key/Value Pair Data Result",
+                            value            : JSON.stringify(apexResponse,null,4),
+                            mode             : "text/javascript",
+                            theme            : this.codemirrorResultTheme,
                             disabled         : false,
                             
                             // Download info
@@ -230,12 +250,13 @@ export default class JsonTable extends LightningElement {
                     }
 
                     case 'rawcsv' :{
-                        textareaModal.open({
-                            
+                        cmModal.open({
                             // Modal info
-                            size             : 'medium',
-                            label            : 'RAW CSV Data Result',
-                            content          : JSON.stringify(apexResponse,null,4),
+                            size             : "medium",
+                            header           : "RAW CSV Data Result",
+                            value            : JSON.stringify(apexResponse,null,4),
+                            mode             : "text/javascript",
+                            theme            : this.codemirrorResultTheme,
                             disabled         : false,
                             
                             // Download info
@@ -265,6 +286,7 @@ export default class JsonTable extends LightningElement {
         });  
     }
 
+    
     handleClickPrettify(){
         try{
             this.loading = true;
@@ -273,10 +295,11 @@ export default class JsonTable extends LightningElement {
             this.prettifyVariant = 'success';
             
             // Make it pretty
-            this.jsonString = JSON.stringify(JSON.parse(this.jsonString),null,4);
-
-            // Update the textarea
-            this.template.querySelector(".ta").value = this.jsonString;
+            setCmValue(
+                this.template,
+                this.codemirrorClass,
+                JSON.stringify(JSON.parse(getCmValue(this.template, this.codemirrorClass)),null,4)
+            );
 
         }catch(error){
             // Change color to red
@@ -287,6 +310,7 @@ export default class JsonTable extends LightningElement {
         }
     }
     
+
     handleClickHelp(){
         this.handleOpenHelpModal();
     }
@@ -294,11 +318,6 @@ export default class JsonTable extends LightningElement {
     /** **************************************************************************************************** **
      **                                        INPUT CHANGE HANDLERS                                         **
      ** **************************************************************************************************** **/
-    handleChangeJsonString(event){
-        this.jsonString = event.target.value;
-    }
-
-
     handleChangeNumberColumn(event){
         this.numberColumn = event.target.checked;
     }
@@ -344,5 +363,27 @@ export default class JsonTable extends LightningElement {
         }catch(error){
             handleError(error);
         }
+    }
+
+
+    // Actions that run once the code mirror windows has been loaded and added to the DOM
+    handleCodemirrorLoaded(){
+        // Validate the component exists, if something goes wrong we dont want random errors
+        if(cmExists(this.template, this.codemirrorClass)){
+            
+            // Set the loaded value to true
+            this.codemirrorLoaded = true;
+        }
+    }
+
+
+    handleCodemirrorSave(){
+        this.createTable();
+    }
+
+    
+    // Handle any updates in case the theme changes
+    handleThemeChange(event) {
+        this.codemirrorResultTheme = event.detail;
     }
 }

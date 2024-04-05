@@ -11,14 +11,24 @@ It handles multiple data output formats including CSV and is optimised for the u
 |Managed Installation URL | */packaging/installPackage.apexp?p0=04tP3000000M6OXIA0*
 |Unlocked Installation URL| */packaging/installPackage.apexp?p0=04tP3000000M6Q9IAK*
 |Github URL | https://github.com/jfwberg/lightweight-apex-unit-test-util-v2
+## Dependency info
+
+| Info | Value |
+|---|---|
+|Name|Lightweight - LWC Util|
+|Version|0.4.0-2|
+|Managed Installation URL | */packaging/installPackage.apexp?p0=04tP3000000SkG1IAK*
+|Unlocked Installation URL| */packaging/installPackage.apexp?p0=04tP3000000SkHdIAK*
+|Github URL | https://github.com/jfwberg/lightweight-lwc-utl
+
 
 ## Package Info
 | Info | Value |
 |---|---|
 |Name|Lightweight - JSON Util|
-|Version|0.5.0-1|
-|Managed Installation URL | */packaging/installPackage.apexp?p0=04tP3000000M6mjIAC*
-|Unlocked Installation URL| */packaging/installPackage.apexp?p0=04tP3000000M6pxIAC* 
+|Version|0.6.0-1|
+|Managed Installation URL | */packaging/installPackage.apexp?p0=04tP3000000SkUXIA0*
+|Unlocked Installation URL| */packaging/installPackage.apexp?p0=04tP3000000SkPiIAK* 
 
 
 ## Methods to fetch Objects, Object Maps and Object Lists from an untyped Object Map

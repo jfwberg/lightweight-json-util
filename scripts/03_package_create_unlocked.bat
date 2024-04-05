@@ -11,7 +11,7 @@ SET packagePath=force-app/package
 
 REM Package Config
 SET packageId=0HoP3000000009hKAA
-SET packageVersionId=04tP3000000M6pxIAC
+SET packageVersionId=04tP3000000SkPiIAK
 
 REM Create package
 sf package create --name "%packageName%" --description "%packageDescription%" --package-type "%packageType%" --path "%packagePath%" --target-dev-hub %devHub%
@@ -27,3 +27,5 @@ sf package:version:delete -p %packageVersionId% --target-dev-hub %devHub% --no-p
 
 REM Promote package version
 sf package:version:promote -p %packageVersionId% --target-dev-hub %devHub% --no-prompt
+
+REM /packaging/installPackage.apexp?p0=04tP3000000SkPiIAK
