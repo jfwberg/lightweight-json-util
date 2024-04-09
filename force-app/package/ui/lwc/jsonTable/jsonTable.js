@@ -9,9 +9,6 @@ import cmModal            from 'c/cmModal';
 import ldtModal           from 'c/ldtModal';
 import textModal          from 'c/textModal';
 
-// Code mirror commands
-import {cmExists, setCmValue, getCmValue} from 'c/cmUtil'
-
 // apex methods
 import createTable        from '@salesforce/apex/JsonTableLwcCtrl.createTable';
 
@@ -84,6 +81,10 @@ export default class JsonTable extends LightningElement {
         ];
     }
 
+    // Method to get the CodeMirror Textarea Child component
+    getCmTa(){
+        return this.template.querySelector('c-cm-textarea');
+    }
 
     /** **************************************************************************************************** **
      **                                          CREATE TABLE LOGIC                                          **
@@ -93,197 +94,201 @@ export default class JsonTable extends LightningElement {
         // Show spinner
         this.loading = true;
 
-        // Execute Apex
-        createTable({ 
-            jsonString        : getCmValue(this.template, this.codemirrorClass),
-            numberColumn      : this.numberColumn,
-            attributeFilter   : this.attributeFilterValue,
-            listNameFilter    : this.listNameFilterValue,
-            outputFormatValue : this.outputFormatValue
-        })
-        .then(apexResponse => {
-            try{
-                // Handle each output format accordingly
-                switch (this.outputFormatValue) {
-                    case 'lwctable' :{
-                        ldtModal.open({
-                            size   : 'large',
-                            header : 'Key / Value Table Result',
-                            ldt    : apexResponse
-                        });
-                        break;
-                    }
+        try{   
+            // Execute Apex
+            createTable({ 
+                jsonString        : this.getCmTa().value,
+                numberColumn      : this.numberColumn,
+                attributeFilter   : this.attributeFilterValue,
+                listNameFilter    : this.listNameFilterValue,
+                outputFormatValue : this.outputFormatValue
+            })
+            .then(apexResponse => {
+                try{
+                    // Handle each output format accordingly
+                    switch (this.outputFormatValue) {
+                        case 'lwctable' :{
+                            ldtModal.open({
+                                size   : 'large',
+                                header : 'Key / Value Table Result',
+                                ldt    : apexResponse
+                            });
+                            break;
+                        }
 
-                    case 'lwckeyvaluetable' :{
-                        ldtModal.open({
-                            size   : 'large',
-                            header : 'Key / Value Pair Table Result',
-                            ldt    : apexResponse
-                        });
-                        break;
-                    }
+                        case 'lwckeyvaluetable' :{
+                            ldtModal.open({
+                                size   : 'large',
+                                header : 'Key / Value Pair Table Result',
+                                ldt    : apexResponse
+                            });
+                            break;
+                        }
 
-                    case 'csvstring' :{
-                        cmModal.open({
-                            size             : "large",
-                            header           : "CSV String",
-                            value            : apexResponse,
-                            mode             : "csv",
-                            theme            : this.codemirrorResultTheme,
-                            disabled         : false,
-                            
-                            // Download info
-                            fileName         : 'JSONTableCsvString',
-                            fileExtension    : '.csv',
-                            fileMimeType     : 'text/csv; charset=utf-8;',
-                            includeTimestamp : true,
-                            
-                            // Button visibillity
-                            copyButton       : true,
-                            downloadButton   : true,
-                            prettifyButton   : false,
-                            closeButton      : true
-                        });
-                        break;
-                    }
+                        case 'csvstring' :{
+                            cmModal.open({
+                                size             : "large",
+                                header           : "CSV String",
+                                value            : apexResponse,
+                                mode             : "csv",
+                                theme            : this.codemirrorResultTheme,
+                                disabled         : false,
+                                
+                                // Download info
+                                fileName         : 'JSONTableCsvString',
+                                fileExtension    : '.csv',
+                                fileMimeType     : 'text/csv; charset=utf-8;',
+                                includeTimestamp : true,
+                                
+                                // Button visibillity
+                                copyButton       : true,
+                                downloadButton   : true,
+                                prettifyButton   : false,
+                                closeButton      : true
+                            });
+                            break;
+                        }
 
-                    case 'consolestring' : {
-                        cmModal.open({
-                            
-                            // Modal info
-                            size             : "large",
-                            header           : "Console String Result",
-                            value            : apexResponse,
-                            mode             : "text/plain",
-                            theme            : this.codemirrorResultTheme,
-                            disabled         : false,
-                            
-                            // Download info
-                            fileName         : 'JSONTableConsoleString',
-                            fileExtension    : '.txt',
-                            fileMimeType     : 'text/plain; charset=utf-8;',
-                            includeTimestamp : true,
-                            
-                            // Button visibillity
-                            copyButton       : true,
-                            downloadButton   : true,
-                            prettifyButton   : false,
-                            closeButton      : true
-                        });
-                        break;
-                    }
+                        case 'consolestring' : {
+                            cmModal.open({
+                                
+                                // Modal info
+                                size             : "large",
+                                header           : "Console String Result",
+                                value            : apexResponse,
+                                mode             : "text/plain",
+                                theme            : this.codemirrorResultTheme,
+                                disabled         : false,
+                                
+                                // Download info
+                                fileName         : 'JSONTableConsoleString',
+                                fileExtension    : '.txt',
+                                fileMimeType     : 'text/plain; charset=utf-8;',
+                                includeTimestamp : true,
+                                
+                                // Button visibillity
+                                copyButton       : true,
+                                downloadButton   : true,
+                                prettifyButton   : false,
+                                closeButton      : true
+                            });
+                            break;
+                        }
 
-                    case 'rawkeyvalue' :{
-                        cmModal.open({
-                            
-                            // Modal info
-                            size             : "medium",
-                            header           : "RAW Key/Value Result",
-                            value            : JSON.stringify(apexResponse,null,4),
-                            mode             : "text/javascript",
-                            theme            : this.codemirrorResultTheme,
-                            disabled         : false,
-                            
-                            // Download info
-                            fileName         : 'JSONTableKeyValueData',
-                            fileExtension    : '.json',
-                            fileMimeType     : 'application/json; charset=utf-8;',
-                            includeTimestamp : true,
-                            
-                            // Button visibillity
-                            copyButton       : true,
-                            downloadButton   : true,
-                            prettifyButton   : true,
-                            closeButton      : true
-                        });
-                        break;
-                    }
+                        case 'rawkeyvalue' :{
+                            cmModal.open({
+                                
+                                // Modal info
+                                size             : "medium",
+                                header           : "RAW Key/Value Result",
+                                value            : JSON.stringify(apexResponse,null,4),
+                                mode             : "text/javascript",
+                                theme            : this.codemirrorResultTheme,
+                                disabled         : false,
+                                
+                                // Download info
+                                fileName         : 'JSONTableKeyValueData',
+                                fileExtension    : '.json',
+                                fileMimeType     : 'application/json; charset=utf-8;',
+                                includeTimestamp : true,
+                                
+                                // Button visibillity
+                                copyButton       : true,
+                                downloadButton   : true,
+                                prettifyButton   : true,
+                                closeButton      : true
+                            });
+                            break;
+                        }
 
-                    case 'rawindexed' :{
-                        cmModal.open({
-                            // Modal info
-                            size             : "medium",
-                            header           : "RAW Indexed Data Result",
-                            value            : JSON.stringify(apexResponse,null,4),
-                            mode             : "text/javascript",
-                            theme            : this.codemirrorResultTheme,
-                            disabled         : false,
-                            
-                            // Download info
-                            fileName         : 'JSONTableIndexedData',
-                            fileExtension    : '.json',
-                            fileMimeType     : 'application/json; charset=utf-8;',
-                            includeTimestamp : true,
-                            
-                            // Button visibillity
-                            copyButton       : true,
-                            downloadButton   : true,
-                            prettifyButton   : true,
-                            closeButton      : true
-                        });
-                        break;
-                    }
+                        case 'rawindexed' :{
+                            cmModal.open({
+                                // Modal info
+                                size             : "medium",
+                                header           : "RAW Indexed Data Result",
+                                value            : JSON.stringify(apexResponse,null,4),
+                                mode             : "text/javascript",
+                                theme            : this.codemirrorResultTheme,
+                                disabled         : false,
+                                
+                                // Download info
+                                fileName         : 'JSONTableIndexedData',
+                                fileExtension    : '.json',
+                                fileMimeType     : 'application/json; charset=utf-8;',
+                                includeTimestamp : true,
+                                
+                                // Button visibillity
+                                copyButton       : true,
+                                downloadButton   : true,
+                                prettifyButton   : true,
+                                closeButton      : true
+                            });
+                            break;
+                        }
 
-                    case 'rawkeyvaluepair' :{
-                        cmModal.open({
-                            // Modal info
-                            size             : "medium",
-                            header           : "RAW Key/Value Pair Data Result",
-                            value            : JSON.stringify(apexResponse,null,4),
-                            mode             : "text/javascript",
-                            theme            : this.codemirrorResultTheme,
-                            disabled         : false,
-                            
-                            // Download info
-                            fileName         : 'JSONTableKeyValuePairData',
-                            fileExtension    : '.json',
-                            fileMimeType     : 'application/json; charset=utf-8;',
-                            includeTimestamp : true,
-                            
-                            // Button visibillity
-                            copyButton       : true,
-                            downloadButton   : true,
-                            prettifyButton   : true,
-                            closeButton      : true
-                        });
-                        break;
-                    }
+                        case 'rawkeyvaluepair' :{
+                            cmModal.open({
+                                // Modal info
+                                size             : "medium",
+                                header           : "RAW Key/Value Pair Data Result",
+                                value            : JSON.stringify(apexResponse,null,4),
+                                mode             : "text/javascript",
+                                theme            : this.codemirrorResultTheme,
+                                disabled         : false,
+                                
+                                // Download info
+                                fileName         : 'JSONTableKeyValuePairData',
+                                fileExtension    : '.json',
+                                fileMimeType     : 'application/json; charset=utf-8;',
+                                includeTimestamp : true,
+                                
+                                // Button visibillity
+                                copyButton       : true,
+                                downloadButton   : true,
+                                prettifyButton   : true,
+                                closeButton      : true
+                            });
+                            break;
+                        }
 
-                    case 'rawcsv' :{
-                        cmModal.open({
-                            // Modal info
-                            size             : "medium",
-                            header           : "RAW CSV Data Result",
-                            value            : JSON.stringify(apexResponse,null,4),
-                            mode             : "text/javascript",
-                            theme            : this.codemirrorResultTheme,
-                            disabled         : false,
-                            
-                            // Download info
-                            fileName         : 'JSONTableCsvData',
-                            fileExtension    : '.json',
-                            fileMimeType     : 'application/json; charset=utf-8;',
-                            includeTimestamp : true,
-                            
-                            // Button visibillity
-                            copyButton       : true,
-                            downloadButton   : true,
-                            prettifyButton   : true,
-                            closeButton      : true
-                        });
-                        break;
+                        case 'rawcsv' :{
+                            cmModal.open({
+                                // Modal info
+                                size             : "medium",
+                                header           : "RAW CSV Data Result",
+                                value            : JSON.stringify(apexResponse,null,4),
+                                mode             : "text/javascript",
+                                theme            : this.codemirrorResultTheme,
+                                disabled         : false,
+                                
+                                // Download info
+                                fileName         : 'JSONTableCsvData',
+                                fileExtension    : '.json',
+                                fileMimeType     : 'application/json; charset=utf-8;',
+                                includeTimestamp : true,
+                                
+                                // Button visibillity
+                                copyButton       : true,
+                                downloadButton   : true,
+                                prettifyButton   : true,
+                                closeButton      : true
+                            });
+                            break;
+                        }
                     }
+                }catch(error){
+                    handleError(error);
                 }
-            }catch(error){
+            })
+            .catch(error => {
                 handleError(error);
-            }
-        })
-        .catch(error => {
+            })
+            .finally(() => {
+                this.loading = false;
+            });
+        }catch(error){
             handleError(error);
-        })
-        .finally(() => {
-            this.loading = false;
-        });  
+        }
     }
 
     
@@ -295,12 +300,8 @@ export default class JsonTable extends LightningElement {
             this.prettifyVariant = 'success';
             
             // Make it pretty
-            setCmValue(
-                this.template,
-                this.codemirrorClass,
-                JSON.stringify(JSON.parse(getCmValue(this.template, this.codemirrorClass)),null,4)
-            );
-
+            this.getCmTa().value = JSON.stringify(JSON.parse(this.getCmTa().value),null,4);
+            
         }catch(error){
             // Change color to red
             this.prettifyVariant = 'destructive';
@@ -368,12 +369,7 @@ export default class JsonTable extends LightningElement {
 
     // Actions that run once the code mirror windows has been loaded and added to the DOM
     handleCodemirrorLoaded(){
-        // Validate the component exists, if something goes wrong we dont want random errors
-        if(cmExists(this.template, this.codemirrorClass)){
-            
-            // Set the loaded value to true
-            this.codemirrorLoaded = true;
-        }
+        this.codemirrorLoaded = true;
     }
 
 

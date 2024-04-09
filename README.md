@@ -16,20 +16,18 @@ It handles multiple data output formats including CSV and is optimised for the u
 | Info | Value |
 |---|---|
 |Name|Lightweight - LWC Util|
-|Version|0.4.0-2|
-|Managed Installation URL | */packaging/installPackage.apexp?p0=04tP3000000SkG1IAK*
-|Unlocked Installation URL| */packaging/installPackage.apexp?p0=04tP3000000SkHdIAK*
+|Version|0.6.0-2|
+|Managed Installation URL | */packaging/installPackage.apexp?p0=04tP3000000T7ZBIA0*
+|Unlocked Installation URL| */packaging/installPackage.apexp?p0=04tP3000000T7cPIAS*
 |Github URL | https://github.com/jfwberg/lightweight-lwc-utl
-
 
 ## Package Info
 | Info | Value |
 |---|---|
 |Name|Lightweight - JSON Util|
-|Version|0.6.0-1|
-|Managed Installation URL | */packaging/installPackage.apexp?p0=04tP3000000SkUXIA0*
-|Unlocked Installation URL| */packaging/installPackage.apexp?p0=04tP3000000SkPiIAK* 
-
+|Version|0.7.0-1|
+|Managed Installation URL | */packaging/installPackage.apexp?p0=04tP3000000T7m5IAC*
+|Unlocked Installation URL| */packaging/installPackage.apexp?p0=04tP3000000T7nhIAC* 
 
 ## Methods to fetch Objects, Object Maps and Object Lists from an untyped Object Map
 If you have a complex data structure and have used ```JSON.deserializeUntyped()``` you can get a complex set of deeply nested untyped object values, lists and data structures.

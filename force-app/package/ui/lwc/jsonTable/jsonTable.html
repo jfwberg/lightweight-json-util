@@ -39,18 +39,24 @@
         
         <lightning-tabset>
             <lightning-tab label="Input">    
+                <div class="slds-var-p-around_small">
+                    <div class="slds-form-element">
+                        <label class="slds-form-element__label" for="cm-ta">JSON String</label>
+                        <div class="slds-form-element__control">
+                            <div class="slds-box cm-ta" id="cm-ta">
+                                <c-cm-textarea
+                                    onloadingcomplete = {handleCodemirrorLoaded}
+                                    onsave            = {handleCodemirrorSave}
+                                    disabled          = {codemirrorDisabled}
+                                    value             = {codemirrorValue} 
+                                    theme             = {codemirrorTheme}
+                                    mode              = {codemirrorMode}
+                                ></c-cm-textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                <c-cm-textarea
-                    onloadingcomplete = {handleCodemirrorLoaded}
-                    onsave            = {handleCodemirrorSave}
-                    disabled          = {codemirrorDisabled}
-                    value             = {codemirrorValue} 
-                    theme             = {codemirrorTheme}
-                    mode              = {codemirrorMode} 
-                    class             = "ta"
-                ></c-cm-textarea>
-
-                   
                 <div class="slds-p-around_x-small">
                     <lightning-combobox
                         name        = "Filter preset"
