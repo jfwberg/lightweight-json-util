@@ -7,27 +7,27 @@ It handles multiple data output formats including CSV and is optimised for the u
 | Info | Value |
 |---|---|
 |Name|Lightweight - Apex Unit Test Util v2|
-|Version|2.4.0-1|
-|Managed Installation URL | */packaging/installPackage.apexp?p0=04tP3000000M6OXIA0*
-|Unlocked Installation URL| */packaging/installPackage.apexp?p0=04tP3000000M6Q9IAK*
+|Version|2.5.0-1|
+|Managed Installation URL | */packaging/installPackage.apexp?p0=04tP3000000rUmLIAU*
+|Unlocked Installation URL| */packaging/installPackage.apexp?p0=04tP3000000rUpZIAU*
 |Github URL | https://github.com/jfwberg/lightweight-apex-unit-test-util-v2
 ## Dependency info
 
 | Info | Value |
 |---|---|
 |Name|Lightweight - LWC Util|
-|Version|0.6.0-2|
-|Managed Installation URL | */packaging/installPackage.apexp?p0=04tP3000000T7ZBIA0*
-|Unlocked Installation URL| */packaging/installPackage.apexp?p0=04tP3000000T7cPIAS*
+|Version|0.7.0-2|
+|Managed Installation URL | */packaging/installPackage.apexp?p0=04tP3000000t8rNIAQ*
+|Unlocked Installation URL| */packaging/installPackage.apexp?p0=04tP3000000t94HIAQ*
 |Github URL | https://github.com/jfwberg/lightweight-lwc-utl
 
 ## Package Info
 | Info | Value |
 |---|---|
 |Name|Lightweight - JSON Util|
-|Version|0.7.0-1|
-|Managed Installation URL | */packaging/installPackage.apexp?p0=04tP3000000T7m5IAC*
-|Unlocked Installation URL| */packaging/installPackage.apexp?p0=04tP3000000T7nhIAC* 
+|Version|0.8.0-1|
+|Managed Installation URL | */packaging/installPackage.apexp?p0=04tP3000000tDMPIA2*
+|Unlocked Installation URL| */packaging/installPackage.apexp?p0=04tP3000000tDRFIA2* 
 
 ## Methods to fetch Objects, Object Maps and Object Lists from an untyped Object Map
 If you have a complex data structure and have used ```JSON.deserializeUntyped()``` you can get a complex set of deeply nested untyped object values, lists and data structures.
