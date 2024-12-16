@@ -6,28 +6,26 @@ It handles multiple data output formats including CSV and is optimised for the u
 ## Dependency info
 | Info | Value |
 |---|---|
-|Name|Lightweight - Apex Unit Test Util v2|
+|Name|Lightweight - Apex Unit Test Util v2 |
 |Version|2.5.0-1|
-|Managed Installation URL | */packaging/installPackage.apexp?p0=04tP3000000rUmLIAU*
-|Unlocked Installation URL| */packaging/installPackage.apexp?p0=04tP3000000rUpZIAU*
-|Github URL | https://github.com/jfwberg/lightweight-apex-unit-test-util-v2
-## Dependency info
-
+|Managed Installation URL | */packaging/installPackage.apexp?p0=04tP3000000rUmLIAU* |
+|Unlocked Installation URL| */packaging/installPackage.apexp?p0=04tP3000000rUpZIAU* |
+|Github URL | https://github.com/jfwberg/lightweight-apex-unit-test-util-v2 |
 | Info | Value |
 |---|---|
-|Name|Lightweight - LWC Util|
-|Version|0.7.0-2|
-|Managed Installation URL | */packaging/installPackage.apexp?p0=04tP3000000t8rNIAQ*
-|Unlocked Installation URL| */packaging/installPackage.apexp?p0=04tP3000000t94HIAQ*
-|Github URL | https://github.com/jfwberg/lightweight-lwc-utl
+|Name|Lightweight - LWC Util |
+|Version|0.8.0-1|
+|Managed Installation URL | */packaging/installPackage.apexp?p0=04tP3000000wL0rIAE* |
+|Unlocked Installation URL| */packaging/installPackage.apexp?p0=04tP3000000wL2TIAU* |
+|Github URL | https://github.com/jfwberg/lightweight-lwc-util |
 
 ## Package Info
 | Info | Value |
 |---|---|
 |Name|Lightweight - JSON Util|
 |Version|0.8.0-1|
-|Managed Installation URL | */packaging/installPackage.apexp?p0=04tP3000000tDMPIA2*
-|Unlocked Installation URL| */packaging/installPackage.apexp?p0=04tP3000000tDRFIA2* 
+|Managed Installation URL | */packaging/installPackage.apexp?p0=04tP3000000tDMPIA2* |
+|Unlocked Installation URL| */packaging/installPackage.apexp?p0=04tP3000000tDRFIA2* |
 
 ## Methods to fetch Objects, Object Maps and Object Lists from an untyped Object Map
 If you have a complex data structure and have used ```JSON.deserializeUntyped()``` you can get a complex set of deeply nested untyped object values, lists and data structures.

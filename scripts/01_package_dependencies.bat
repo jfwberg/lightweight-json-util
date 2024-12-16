@@ -4,8 +4,8 @@ REM --------------------------------------------------------
 rem Lightweight - Apex Unit Test Util v2@2.5.0-2
 sf package install --package "04tP3000000rUmLIAU" -w 30
 
-REM Lightweight - Apex LWC Util@0.7.0-2
-sf package install --package "04tP3000000t8rNIAQ" -w 30
+REM Lightweight - Apex LWC Util@0.8.0-1
+sf package install --package "04tP3000000wL0rIAE" -w 30
 
 
 REM --------------------------------------------------------
@@ -14,8 +14,8 @@ REM --------------------------------------------------------
 rem Lightweight - Apex Unit Test Util v2 (Unlocked)@2.5.0-2
 sf package install -package "04tP3000000rUpZIAU" -w 30
 
-REM Lightweight - Apex LWC Util@0.7.0-1 (Unlocked)
-sf package install --package "04tP3000000tD6HIAU" -w 30
+REM Lightweight - Apex LWC Util@0.8.0-1 (Unlocked)
+sf package install --package "04tP3000000wL2TIAU" -w 30
 
 
 REM --------------------------------------------------------

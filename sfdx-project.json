@@ -7,13 +7,13 @@
       "versionName": "v62.0 - 0.8",
       "versionNumber": "0.8.0.NEXT",
       "versionDescription": "A lightweight Apex utility for path based traversing of untyped Object Maps and converting JSON to a flat Data Table or CSV format",
-      "ancestorVersion": "0.7.0",
+      "ancestorVersion": "HIGHEST",
       "dependencies": [
         {
           "package": "Lightweight - Apex Unit Test Util v2@2.5.0-1"
         },
         {
-          "package": "Lightweight - Apex LWC Util@0.7.0-1"
+          "package": "Lightweight - Apex LWC Util@0.8.0-1"
         }
       ]
     },
@@ -29,7 +29,7 @@
           "package": "Lightweight - Apex Unit Test Util v2 (Unlocked)@2.5.0-1"
         },
         {
-          "package": "Lightweight - Apex LWC Util (Unlocked)@0.7.0-1"
+          "package": "Lightweight - Apex LWC Util (Unlocked)@0.8.0-1"
         }
       ]
     }
@@ -41,8 +41,8 @@
   "packageAliases": {
     "Lightweight - Apex Unit Test Util v2@2.5.0-1": "04tP3000000rUmLIAU",
     "Lightweight - Apex Unit Test Util v2 (Unlocked)@2.5.0-1": "04tP3000000rUpZIAU",
-    "Lightweight - Apex LWC Util@0.7.0-1": "04tP3000000t8rNIAQ",
-    "Lightweight - Apex LWC Util (Unlocked)@0.7.0-1": "04tP3000000t94HIAQ",
+    "Lightweight - Apex LWC Util@0.8.0-1": "04tP3000000wL0rIAE",
+    "Lightweight - Apex LWC Util (Unlocked)@0.8.0-1": "04tP3000000wL2TIAU",
     "Lightweight - JSON Util": "0HoP3000000006TKAQ",
     "Lightweight - JSON Util@0.1.0-1": "04tP30000005PYrIAM",
     "Lightweight - JSON Util@0.2.0-1": "04tP30000007y99IAA",
